@@ -64,3 +64,32 @@
   --spacing-22: 5.5rem;
   --spacing-30: 7.5rem;
 }
+
+/* Table of Contents Styles */
+.toc {
+  @apply my-8 p-6 bg-neutral-50 rounded-xl border border-neutral-200;
+}
+
+.toc > h2 {
+  @apply text-lg font-bold text-neutral-900 mb-4;
+}
+
+.toc nav ul {
+  @apply list-none pl-0 space-y-2;
+}
+
+.toc nav ul ul {
+  @apply pl-4 mt-2;
+}
+
+.toc nav li {
+  @apply text-sm;
+}
+
+.toc nav a {
+  @apply text-neutral-600 hover:text-primary-600 transition-colors;
+}
+
+.toc nav a:hover {
+  @apply underline;
+}

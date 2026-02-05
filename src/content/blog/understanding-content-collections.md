@@ -11,9 +11,12 @@ tags:
 categories:
   - Tutorials
 draft: false
+showToc: true
 ---
 
 Astro's Content Collections provide a type-safe way to manage your content. Let's explore how they work and why they're so powerful.
+
+<!-- toc -->
 
 ## What Are Content Collections?
 

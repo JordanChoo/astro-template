@@ -11,9 +11,12 @@ tags:
 categories:
   - Best Practices
 draft: false
+showToc: true
 ---
 
 Tailwind CSS has become the go-to utility-first CSS framework. Here are the best practices to make the most of it in 2024.
+
+<!-- toc -->
 
 ## Component Extraction
 

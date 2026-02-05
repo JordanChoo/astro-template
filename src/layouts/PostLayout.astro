@@ -54,7 +54,7 @@ const isoDate = pubDate.toISOString();
       </h1>
 
       <!-- Post Meta -->
-      <div class="flex flex-wrap items-center gap-4 text-neutral-600">
+      <div class="flex flex-wrap items-center gap-4 text-neutral-600 mb-4">
         <!-- Author -->
         <a
           href={`/team/${author.slug}`}
@@ -75,6 +75,22 @@ const isoDate = pubDate.toISOString();
         <!-- Reading Time -->
         <span class="text-neutral-600">{readingTime}</span>
       </div>
+
+      <!-- Tags -->
+      {
+        tags.length > 0 && (
+          <div class="flex flex-wrap items-center gap-2">
+            {tags.map((tag) => (
+              <a
+                href={`/blog/tags/${tag}`}
+                class="inline-block px-3 py-1 text-sm bg-neutral-100 text-neutral-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        )
+      }
     </header>
 
     <!-- Featured Image -->
@@ -90,25 +106,6 @@ const isoDate = pubDate.toISOString();
     <div class="prose prose-neutral prose-lg max-w-none">
       <slot />
     </div>
-
-    <!-- Tags -->
-    {
-      tags.length > 0 && (
-        <footer class="mt-12 pt-8 border-t border-neutral-200">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-neutral-600 font-medium">Tags:</span>
-            {tags.map((tag) => (
-              <a
-                href={`/blog/tags/${tag}`}
-                class="inline-block px-3 py-1 text-sm bg-neutral-100 text-neutral-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
-              >
-                {tag}
-              </a>
-            ))}
-          </div>
-        </footer>
-      )
-    }
 
     <!-- Related Posts Placeholder -->
     <!-- TODO: Implement related posts section based on tags/categories -->

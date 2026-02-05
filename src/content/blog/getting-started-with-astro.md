@@ -11,9 +11,12 @@ tags:
 categories:
   - Tutorials
 draft: false
+showToc: true
 ---
 
 Astro is a modern static site generator that delivers lightning-fast performance by shipping zero JavaScript by default. In this guide, we'll walk through the basics of getting started with Astro.
+
+<!-- toc -->
 
 ## Why Astro?
 

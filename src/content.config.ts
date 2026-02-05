@@ -66,6 +66,8 @@ const blog = defineCollection({
     categories: z.array(z.string()).default([]),
     /** Draft status - drafts are hidden in production */
     draft: z.boolean().default(false),
+    /** Show table of contents */
+    showToc: z.boolean().default(true),
   }),
 });
 

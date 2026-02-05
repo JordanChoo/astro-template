@@ -117,8 +117,8 @@ const breadcrumbs = isHidden ? [] : buildBreadcrumbs(currentPath);
 
 {
   !isHidden && breadcrumbs.length > 1 && (
-    <nav aria-label="Breadcrumb" class="bg-neutral-100 border-b border-neutral-200">
-      <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+    <nav aria-label="Breadcrumb">
+      <div class="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8">
         <ol class="flex flex-wrap items-center gap-2 text-sm">
           {breadcrumbs.map((item, index) => (
             <li class="flex items-center">
