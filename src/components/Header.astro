@@ -3,20 +3,57 @@
  * Header.astro
  *
  * Site header with skip-to-content link, logo/business name,
- * desktop navigation, and mobile hamburger menu.
+ * desktop navigation with dropdowns, and mobile hamburger menu.
  */
 
 import siteConfig from '../config/site';
+import { getSortedServices } from '../content/services/services.schema';
+
+// Get services for dropdown
+const servicesForNav = getSortedServices();
+
+// Navigation link type with optional children for dropdowns
+interface NavLink {
+  text: string;
+  href: string;
+  exact: boolean;
+  children?: NavLink[];
+}
+
+// Build services dropdown children dynamically
+const servicesChildren: NavLink[] = servicesForNav.map((service) => ({
+  text: service.title,
+  href: `/services/${service.slug}`,
+  exact: false,
+}));
 
 // Navigation links for the site
-const navLinks = [
+const navLinks: NavLink[] = [
   { text: 'Home', href: '/', exact: true },
-  { text: 'Services', href: '/services', exact: false },
+  {
+    text: 'About',
+    href: '/about',
+    exact: false,
+    children: [
+      { text: 'About Us', href: '/about', exact: false },
+      { text: 'Team', href: '/team', exact: false },
+    ],
+  },
+  {
+    text: 'Services',
+    href: '/services',
+    exact: false,
+    children: servicesChildren,
+  },
   { text: 'Locations', href: '/locations', exact: false },
   { text: 'Blog', href: '/blog', exact: false },
-  { text: 'Team', href: '/team', exact: false },
-  { text: 'Contact', href: '/contact', exact: false },
 ];
+
+// CTA button configuration (separate from nav links)
+const ctaButton = {
+  text: 'Contact',
+  href: '/contact',
+};
 
 // Get current path for active state
 const currentPath = Astro.url.pathname;
@@ -32,6 +69,13 @@ function isActive(href: string, exact: boolean): boolean {
   }
   // Prefix match: /blog matches /blog, /blog/, /blog/post-slug
   return currentPath === href || currentPath.startsWith(href + '/');
+}
+
+/**
+ * Check if any child link is active (for dropdown parent highlighting)
+ */
+function hasActiveChild(children: NavLink[]): boolean {
+  return children.some((child) => isActive(child.href, child.exact));
 }
 ---
 
@@ -63,21 +107,80 @@ function isActive(href: string, exact: boolean): boolean {
       <!-- Desktop Navigation (hidden below md breakpoint) -->
       <nav class="hidden md:flex items-center gap-1" aria-label="Main navigation">
         {
-          navLinks.map((link) => (
-            <a
-              href={link.href}
-              class:list={[
-                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
-                isActive(link.href, link.exact)
-                  ? 'text-primary-600 bg-primary-50'
-                  : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
-              ]}
-              aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
-            >
-              {link.text}
-            </a>
-          ))
+          navLinks.map((link) =>
+            link.children ? (
+              <div class="relative dropdown-container">
+                <button
+                  type="button"
+                  class:list={[
+                    'dropdown-trigger inline-flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                    isActive(link.href, link.exact) || hasActiveChild(link.children)
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                  ]}
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  {link.text}
+                  <svg
+                    class="w-4 h-4 dropdown-icon transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </button>
+                <div
+                  class="dropdown-menu absolute left-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-neutral-200 py-1 hidden"
+                  role="menu"
+                >
+                  {link.children.map((child) => (
+                    <a
+                      href={child.href}
+                      class:list={[
+                        'block px-4 py-2 text-sm transition-colors',
+                        isActive(child.href, child.exact)
+                          ? 'text-primary-600 bg-primary-50'
+                          : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                      ]}
+                      role="menuitem"
+                      aria-current={isActive(child.href, child.exact) ? 'page' : undefined}
+                    >
+                      {child.text}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <a
+                href={link.href}
+                class:list={[
+                  'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                  isActive(link.href, link.exact)
+                    ? 'text-primary-600 bg-primary-50'
+                    : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                ]}
+                aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
+              >
+                {link.text}
+              </a>
+            )
+          )
         }
+        <!-- CTA Button -->
+        <a
+          href={ctaButton.href}
+          class="ml-2 px-5 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+        >
+          {ctaButton.text}
+        </a>
       </nav>
 
       <!-- Mobile Menu Button (visible below md breakpoint) -->
@@ -138,30 +241,193 @@ function isActive(href: string, exact: boolean): boolean {
       <nav class="flex-1 px-4 py-6 overflow-y-auto" aria-label="Mobile navigation">
         <ul class="space-y-1">
           {
-            navLinks.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class:list={[
-                    'block px-4 py-3 text-base font-medium rounded-md transition-colors mobile-nav-link',
-                    isActive(link.href, link.exact)
-                      ? 'text-primary-600 bg-primary-50'
-                      : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
-                  ]}
-                  aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
-                >
-                  {link.text}
-                </a>
-              </li>
-            ))
+            navLinks.map((link) =>
+              link.children ? (
+                <li>
+                  <div class="mobile-dropdown">
+                    <button
+                      type="button"
+                      class:list={[
+                        'mobile-dropdown-trigger w-full flex items-center justify-between px-4 py-3 text-base font-medium rounded-md transition-colors',
+                        isActive(link.href, link.exact) || hasActiveChild(link.children)
+                          ? 'text-primary-600 bg-primary-50'
+                          : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                      ]}
+                      aria-expanded="false"
+                    >
+                      {link.text}
+                      <svg
+                        class="w-5 h-5 mobile-dropdown-icon transition-transform"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                    <ul class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                      {link.children.map((child) => (
+                        <li>
+                          <a
+                            href={child.href}
+                            class:list={[
+                              'block px-4 py-2 text-base rounded-md transition-colors mobile-nav-link',
+                              isActive(child.href, child.exact)
+                                ? 'text-primary-600 bg-primary-50'
+                                : 'text-neutral-600 hover:text-primary-600 hover:bg-neutral-50',
+                            ]}
+                            aria-current={isActive(child.href, child.exact) ? 'page' : undefined}
+                          >
+                            {child.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </li>
+              ) : (
+                <li>
+                  <a
+                    href={link.href}
+                    class:list={[
+                      'block px-4 py-3 text-base font-medium rounded-md transition-colors mobile-nav-link',
+                      isActive(link.href, link.exact)
+                        ? 'text-primary-600 bg-primary-50'
+                        : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                    ]}
+                    aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
+                  >
+                    {link.text}
+                  </a>
+                </li>
+              )
+            )
           }
         </ul>
+        <!-- Mobile CTA Button -->
+        <div class="mt-6 px-4">
+          <a
+            href={ctaButton.href}
+            class="block w-full text-center px-5 py-3 text-base font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors mobile-nav-link"
+          >
+            {ctaButton.text}
+          </a>
+        </div>
       </nav>
     </div>
   </div>
 </header>
 
 <script>
+  // Desktop dropdown functionality
+  function initDropdowns(): void {
+    const dropdownContainers = document.querySelectorAll('.dropdown-container');
+
+    dropdownContainers.forEach((container) => {
+      const trigger = container.querySelector('.dropdown-trigger') as HTMLButtonElement;
+      const menu = container.querySelector('.dropdown-menu') as HTMLElement;
+      const icon = container.querySelector('.dropdown-icon') as SVGElement;
+
+      if (!trigger || !menu) return;
+
+      let isOpen = false;
+      let closeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+      const openDropdown = (): void => {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
+        isOpen = true;
+        menu.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        if (icon) icon.style.transform = 'rotate(180deg)';
+      };
+
+      const closeDropdown = (): void => {
+        isOpen = false;
+        menu.classList.add('hidden');
+        trigger.setAttribute('aria-expanded', 'false');
+        if (icon) icon.style.transform = '';
+      };
+
+      const scheduleClose = (): void => {
+        closeTimeout = setTimeout(closeDropdown, 150);
+      };
+
+      // Mouse events
+      container.addEventListener('mouseenter', openDropdown);
+      container.addEventListener('mouseleave', scheduleClose);
+
+      // Keyboard events
+      trigger.addEventListener('click', () => {
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          openDropdown();
+        }
+      });
+
+      trigger.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (isOpen) {
+            closeDropdown();
+          } else {
+            openDropdown();
+            // Focus first menu item
+            const firstItem = menu.querySelector('a') as HTMLAnchorElement;
+            if (firstItem) firstItem.focus();
+          }
+        }
+        if (e.key === 'Escape' && isOpen) {
+          closeDropdown();
+          trigger.focus();
+        }
+      });
+
+      // Close on click outside
+      document.addEventListener('click', (e: MouseEvent) => {
+        if (!container.contains(e.target as Node) && isOpen) {
+          closeDropdown();
+        }
+      });
+    });
+  }
+
+  // Mobile dropdown functionality
+  function initMobileDropdowns(): void {
+    const mobileDropdowns = document.querySelectorAll('.mobile-dropdown');
+
+    mobileDropdowns.forEach((dropdown) => {
+      const trigger = dropdown.querySelector('.mobile-dropdown-trigger') as HTMLButtonElement;
+      const menu = dropdown.querySelector('.mobile-dropdown-menu') as HTMLElement;
+      const icon = dropdown.querySelector('.mobile-dropdown-icon') as SVGElement;
+
+      if (!trigger || !menu) return;
+
+      trigger.addEventListener('click', () => {
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+
+        if (isExpanded) {
+          menu.classList.add('hidden');
+          trigger.setAttribute('aria-expanded', 'false');
+          if (icon) icon.style.transform = '';
+        } else {
+          menu.classList.remove('hidden');
+          trigger.setAttribute('aria-expanded', 'true');
+          if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+  }
+
   // Mobile menu toggle functionality
   function initMobileMenu(): void {
     const menuButton = document.getElementById('mobile-menu-button');
@@ -248,7 +514,14 @@ function isActive(href: string, exact: boolean): boolean {
     });
   }
 
+  // Initialize all functionality
+  function init(): void {
+    initDropdowns();
+    initMobileDropdowns();
+    initMobileMenu();
+  }
+
   // Initialize on DOM ready and on Astro page transitions
-  document.addEventListener('DOMContentLoaded', initMobileMenu);
-  document.addEventListener('astro:after-swap', initMobileMenu);
+  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('astro:after-swap', init);
 </script>
