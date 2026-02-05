@@ -1,0 +1,96 @@
+---
+/**
+ * Person JSON-LD Schema Component
+ *
+ * Outputs structured data for Person schema.
+ * Used for team member profiles.
+ *
+ * @see https://schema.org/Person
+ *
+ * @example
+ * ```astro
+ * <PersonLD
+ *   name="John Doe"
+ *   jobTitle="CEO"
+ *   image="/images/team/john-doe.jpg"
+ *   url="/team/john-doe"
+ *   sameAs={['https://twitter.com/johndoe', 'https://linkedin.com/in/johndoe']}
+ * />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface Props {
+  /** Person's full name */
+  name: string;
+  /** Job title / role */
+  jobTitle: string;
+  /** URL to profile image */
+  image?: string;
+  /** URL to person's profile page (relative or absolute) */
+  url: string;
+  /** Array of social profile URLs */
+  sameAs?: string[];
+  /** Short description / bio */
+  description?: string;
+}
+
+const { name, jobTitle, image, url, sameAs, description } = Astro.props;
+
+// Build absolute URLs
+const siteUrl = siteConfig.seo.siteUrl;
+const profileUrl = url.startsWith('http') ? url : new URL(url, siteUrl).href;
+const imageUrl = image
+  ? image.startsWith('http')
+    ? image
+    : new URL(image, siteUrl).href
+  : undefined;
+
+// Build the Person schema object
+interface PersonSchema {
+  '@context': 'https://schema.org';
+  '@type': 'Person';
+  name: string;
+  jobTitle: string;
+  url: string;
+  image?: string;
+  description?: string;
+  sameAs?: string[];
+  worksFor: {
+    '@type': 'Organization';
+    name: string;
+    url: string;
+  };
+}
+
+const schema: PersonSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name,
+  jobTitle,
+  url: profileUrl,
+  worksFor: {
+    '@type': 'Organization',
+    name: siteConfig.name,
+    url: siteUrl,
+  },
+};
+
+// Add optional fields
+if (imageUrl) {
+  schema.image = imageUrl;
+}
+
+if (description) {
+  schema.description = description;
+}
+
+if (sameAs && sameAs.length > 0) {
+  schema.sameAs = sameAs;
+}
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

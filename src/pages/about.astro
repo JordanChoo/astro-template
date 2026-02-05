@@ -7,9 +7,15 @@
 
 import PageLayout from '../layouts/PageLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CTA from '../components/sections/CTA.astro';
 import siteConfig from '../config/site';
+import { getCollection } from 'astro:content';
 
 const currentPath = Astro.url.pathname;
+
+// Get founder from team collection
+const teamMembers = await getCollection('team');
+const founder = teamMembers.find((member) => member.data.slug === 'john-doe');
 ---
 
 <PageLayout title="About">
@@ -41,6 +47,48 @@ const currentPath = Astro.url.pathname;
           attention and solutions tailored to their unique needs.
         </p>
       </section>
+
+      {/* Founder Section */}
+      {
+        founder && (
+          <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-neutral-900 mb-6">Meet Our Founder</h2>
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 bg-neutral-50 rounded-xl border border-neutral-200">
+              <div class="flex-shrink-0">
+                <img
+                  src={founder.data.avatar || '/images/placeholder-avatar.jpg'}
+                  alt={founder.data.name}
+                  class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+              </div>
+              <div class="text-center sm:text-left">
+                <h3 class="text-xl font-bold text-neutral-900">{founder.data.name}</h3>
+                <p class="text-primary-600 font-medium mb-3">Founder & CEO</p>
+                <p class="text-neutral-600 mb-4">{founder.data.bio}</p>
+                <a
+                  href={`/team/${founder.data.slug}`}
+                  class="inline-flex items-center text-primary-600 font-medium hover:text-primary-700 group"
+                >
+                  View full profile
+                  <svg
+                    class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </section>
+        )
+      }
 
       <section class="mb-12">
         <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Our Mission</h2>
@@ -122,17 +170,9 @@ const currentPath = Astro.url.pathname;
           </li>
         </ul>
       </section>
-
-      <section>
-        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Get in Touch</h2>
-        <p class="text-neutral-700">
-          We would love to hear from you. Whether you have questions about our services or want to
-          discuss how we can help, please do not hesitate to
-          <a href="/contact" class="text-primary-600 hover:text-primary-700 underline">
-            contact us
-          </a>.
-        </p>
-      </section>
     </div>
   </div>
+
+  {/* CTA Section */}
+  <CTA headline="Ready to Work With Us?" button={{ text: 'Get in Touch', link: '/contact' }} />
 </PageLayout>

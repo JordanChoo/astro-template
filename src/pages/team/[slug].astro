@@ -18,6 +18,7 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import SEO from '@/components/SEO.astro';
 import BreadcrumbLD from '@/components/seo/BreadcrumbLD.astro';
+import PersonLD from '@/components/seo/PersonLD.astro';
 import PostCard from '@/components/PostCard.astro';
 
 type TeamMember = CollectionEntry<'team'>;
@@ -105,12 +106,29 @@ const socialLinks = [
 
 // Filter to only social links that are configured
 const configuredSocialLinks = socialLinks.filter((link) => member.data.social?.[link.key]);
+
+// Build sameAs array for Person schema (social profile URLs)
+const sameAsUrls: string[] = [];
+if (member.data.social) {
+  const { twitter, linkedin, github } = member.data.social;
+  if (twitter) sameAsUrls.push(twitter);
+  if (linkedin) sameAsUrls.push(linkedin);
+  if (github) sameAsUrls.push(github);
+}
 ---
 
 <PageLayout title={member.data.name}>
   <Fragment slot="head">
     <SEO title={member.data.name} description={member.data.bio} image={member.data.avatar} />
     <BreadcrumbLD items={breadcrumbItems} />
+    <PersonLD
+      name={member.data.name}
+      jobTitle={member.data.role}
+      image={member.data.avatar}
+      url={`/team/${member.data.slug}/`}
+      description={member.data.bio}
+      sameAs={sameAsUrls.length > 0 ? sameAsUrls : undefined}
+    />
   </Fragment>
 
   <Breadcrumbs currentPath={currentPath} />
@@ -211,27 +229,5 @@ const configuredSocialLinks = socialLinks.filter((link) => member.data.social?.[
         </section>
       )
     }
-
-    {/* Back to Team Link */}
-    <div class="mt-12 pt-8 border-t border-neutral-200">
-      <a
-        href="/team/"
-        class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
-      >
-        <svg
-          class="mr-2 w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
-        </svg>
-        Back to team
-      </a>
-    </div>
   </article>
 </PageLayout>
