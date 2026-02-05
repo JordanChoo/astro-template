@@ -14,10 +14,10 @@ import WebSiteLD from '../components/seo/WebSiteLD.astro';
 import Hero from '../components/sections/Hero.astro';
 import Features from '../components/sections/Features.astro';
 import Stats from '../components/sections/Stats.astro';
+import Services from '../components/sections/Services.astro';
 import Testimonials from '../components/sections/Testimonials.astro';
 import CTA from '../components/sections/CTA.astro';
 import FAQ from '../components/sections/FAQ.astro';
-import ContactInfo from '../components/sections/ContactInfo.astro';
 
 // Homepage data (validated via Zod at import time)
 import homepage from '../data/homepage.schema';
@@ -43,6 +43,9 @@ import homepage from '../data/homepage.schema';
   {/* Stats Section - only show if stats exist */}
   {homepage.stats.length > 0 && <Stats stats={homepage.stats} />}
 
+  {/* Services Section */}
+  <Services />
+
   {/* Testimonials Section - only show if testimonials exist */}
   {homepage.testimonials.length > 0 && <Testimonials testimonials={homepage.testimonials} />}
 
@@ -52,6 +55,6 @@ import homepage from '../data/homepage.schema';
   {/* FAQ Section - only show if FAQ items exist */}
   {homepage.faq.length > 0 && <FAQ items={homepage.faq} />}
 
-  {/* Contact Info Section - only show if enabled in config */}
-  {homepage.showContact && <ContactInfo />}
+  {/* Bottom CTA Section */}
+  <CTA headline={homepage.cta.headline} button={homepage.cta.button} />
 </PageLayout>

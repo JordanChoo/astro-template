@@ -277,7 +277,6 @@ const siteConfig: SiteConfig = {
   footerNav: [
     { text: 'Privacy Policy', link: '/privacy' },
     { text: 'Terms of Service', link: '/terms' },
-    { text: 'Sitemap', link: '/sitemap-index.xml' },
   ],
 };
 
