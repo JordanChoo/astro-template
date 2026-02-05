@@ -1,0 +1,254 @@
+---
+/**
+ * Header.astro
+ *
+ * Site header with skip-to-content link, logo/business name,
+ * desktop navigation, and mobile hamburger menu.
+ */
+
+import siteConfig from '../config/site';
+
+// Navigation links for the site
+const navLinks = [
+  { text: 'Home', href: '/', exact: true },
+  { text: 'Services', href: '/services', exact: false },
+  { text: 'Locations', href: '/locations', exact: false },
+  { text: 'Blog', href: '/blog', exact: false },
+  { text: 'Team', href: '/team', exact: false },
+  { text: 'Contact', href: '/contact', exact: false },
+];
+
+// Get current path for active state
+const currentPath = Astro.url.pathname;
+
+/**
+ * Check if a nav link is active
+ * - Exact match for Home (/)
+ * - Prefix match for other pages (e.g., /blog matches /blog/*)
+ */
+function isActive(href: string, exact: boolean): boolean {
+  if (exact) {
+    return currentPath === href;
+  }
+  // Prefix match: /blog matches /blog, /blog/, /blog/post-slug
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<header class="bg-white border-b border-neutral-200 sticky top-0 z-50">
+  <!-- Skip to content link - first focusable element, visually hidden until focused -->
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+  >
+    Skip to main content
+  </a>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo / Business Name -->
+      <a
+        href="/"
+        class="flex items-center gap-2 text-neutral-900 hover:text-primary-600 transition-colors"
+      >
+        {
+          siteConfig.logo ? (
+            <img src={siteConfig.logo} alt={siteConfig.name} class="h-8 w-auto" />
+          ) : (
+            <span class="text-xl font-bold">{siteConfig.name}</span>
+          )
+        }
+      </a>
+
+      <!-- Desktop Navigation (hidden below md breakpoint) -->
+      <nav class="hidden md:flex items-center gap-1" aria-label="Main navigation">
+        {
+          navLinks.map((link) => (
+            <a
+              href={link.href}
+              class:list={[
+                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                isActive(link.href, link.exact)
+                  ? 'text-primary-600 bg-primary-50'
+                  : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+              ]}
+              aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
+            >
+              {link.text}
+            </a>
+          ))
+        }
+      </nav>
+
+      <!-- Mobile Menu Button (visible below md breakpoint) -->
+      <button
+        type="button"
+        id="mobile-menu-button"
+        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-neutral-700 hover:text-primary-600 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Open main menu"
+      >
+        <!-- Hamburger icon -->
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Overlay (hidden by default) -->
+  <div id="mobile-menu" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+    <!-- Backdrop -->
+    <div id="mobile-menu-backdrop" class="fixed inset-0 bg-neutral-900/50"></div>
+
+    <!-- Menu Panel -->
+    <div class="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col">
+      <!-- Menu Header -->
+      <div class="flex items-center justify-between px-4 h-16 border-b border-neutral-200">
+        <span class="text-lg font-bold text-neutral-900">{siteConfig.name}</span>
+        <button
+          type="button"
+          id="mobile-menu-close"
+          class="inline-flex items-center justify-center p-2 rounded-md text-neutral-700 hover:text-primary-600 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+          aria-label="Close menu"
+        >
+          <!-- Close icon -->
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Menu Navigation -->
+      <nav class="flex-1 px-4 py-6 overflow-y-auto" aria-label="Mobile navigation">
+        <ul class="space-y-1">
+          {
+            navLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class:list={[
+                    'block px-4 py-3 text-base font-medium rounded-md transition-colors mobile-nav-link',
+                    isActive(link.href, link.exact)
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50',
+                  ]}
+                  aria-current={isActive(link.href, link.exact) ? 'page' : undefined}
+                >
+                  {link.text}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle functionality
+  function initMobileMenu(): void {
+    const menuButton = document.getElementById('mobile-menu-button');
+    const closeButton = document.getElementById('mobile-menu-close');
+    const menu = document.getElementById('mobile-menu');
+    const backdrop = document.getElementById('mobile-menu-backdrop');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    if (!menuButton || !closeButton || !menu || !backdrop) {
+      return;
+    }
+
+    // Get all focusable elements in the menu
+    const getFocusableElements = (): HTMLElement[] => {
+      const focusableSelectors =
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      return Array.from(menu.querySelectorAll<HTMLElement>(focusableSelectors));
+    };
+
+    // Open menu
+    const openMenu = (): void => {
+      menu.classList.remove('hidden');
+      menu.setAttribute('aria-hidden', 'false');
+      menuButton.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden'; // Scroll lock
+
+      // Focus the close button
+      closeButton.focus();
+    };
+
+    // Close menu
+    const closeMenu = (): void => {
+      menu.classList.add('hidden');
+      menu.setAttribute('aria-hidden', 'true');
+      menuButton.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = ''; // Remove scroll lock
+
+      // Return focus to menu button
+      menuButton.focus();
+    };
+
+    // Handle focus trapping
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (menu.classList.contains('hidden')) {
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu();
+        return;
+      }
+
+      if (event.key === 'Tab') {
+        const focusableElements = getFocusableElements();
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey) {
+          // Shift+Tab: if on first element, wrap to last
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: if on last element, wrap to first
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    // Event listeners
+    menuButton.addEventListener('click', openMenu);
+    closeButton.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Close menu when clicking a nav link
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+  }
+
+  // Initialize on DOM ready and on Astro page transitions
+  document.addEventListener('DOMContentLoaded', initMobileMenu);
+  document.addEventListener('astro:after-swap', initMobileMenu);
+</script>

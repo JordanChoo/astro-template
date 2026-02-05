@@ -1,0 +1,155 @@
+---
+/**
+ * Breadcrumbs.astro
+ *
+ * Path-based breadcrumb navigation component.
+ * Patterns: /services/[slug], /locations/[slug], /blog/[slug],
+ *           /blog/tags/[tag], /blog/categories/[cat], /team/[slug]
+ *
+ * Hidden on homepage (/) and 404 pages.
+ */
+
+interface Props {
+  /** Current page path (from Astro.url.pathname) */
+  currentPath: string;
+}
+
+interface BreadcrumbItem {
+  text: string;
+  href?: string;
+}
+
+const { currentPath } = Astro.props;
+
+// Hide breadcrumbs on homepage and 404
+const isHidden = currentPath === '/' || currentPath === '/404';
+
+/**
+ * Convert a slug to a human-readable title
+ * Example: "my-service-name" -> "My Service Name"
+ */
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Build breadcrumb items from the current path
+ */
+function buildBreadcrumbs(path: string): BreadcrumbItem[] {
+  const items: BreadcrumbItem[] = [{ text: 'Home', href: '/' }];
+
+  // Remove trailing slash and split into segments
+  const cleanPath = path.replace(/\/$/, '');
+  const segments = cleanPath.split('/').filter(Boolean);
+
+  if (segments.length === 0) {
+    return items;
+  }
+
+  // Build breadcrumb trail
+  let currentHref = '';
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+    currentHref += `/${segment}`;
+    const isLast = i === segments.length - 1;
+
+    // Special handling for known patterns
+    if (segment === 'blog') {
+      items.push({
+        text: 'Blog',
+        href: isLast ? undefined : '/blog',
+      });
+    } else if (segment === 'services') {
+      items.push({
+        text: 'Services',
+        href: isLast ? undefined : '/services',
+      });
+    } else if (segment === 'locations') {
+      items.push({
+        text: 'Locations',
+        href: isLast ? undefined : '/locations',
+      });
+    } else if (segment === 'team') {
+      items.push({
+        text: 'Team',
+        href: isLast ? undefined : '/team',
+      });
+    } else if (segment === 'tags') {
+      // /blog/tags - show as "Tags"
+      items.push({
+        text: 'Tags',
+        href: isLast ? undefined : '/blog/tags',
+      });
+    } else if (segment === 'categories') {
+      // /blog/categories - show as "Categories"
+      items.push({
+        text: 'Categories',
+        href: isLast ? undefined : '/blog/categories',
+      });
+    } else {
+      // Slug segment (e.g., post-title, service-name, tag-name)
+      const _previousSegment = i > 0 ? segments[i - 1] : null;
+
+      // Determine label based on context
+      let text = slugToTitle(segment);
+
+      // For paginated pages like /blog/2, /blog/tags/news/2
+      if (/^\d+$/.test(segment)) {
+        text = `Page ${segment}`;
+      }
+
+      items.push({
+        text,
+        href: isLast ? undefined : currentHref,
+      });
+    }
+  }
+
+  return items;
+}
+
+const breadcrumbs = isHidden ? [] : buildBreadcrumbs(currentPath);
+---
+
+{
+  !isHidden && breadcrumbs.length > 1 && (
+    <nav aria-label="Breadcrumb" class="bg-neutral-100 border-b border-neutral-200">
+      <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm">
+          {breadcrumbs.map((item, index) => (
+            <li class="flex items-center">
+              {index > 0 && (
+                <svg
+                  class="h-4 w-4 text-neutral-400 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              )}
+              {item.href ? (
+                <a
+                  href={item.href}
+                  class="text-neutral-600 hover:text-primary-600 transition-colors"
+                >
+                  {item.text}
+                </a>
+              ) : (
+                <span class="text-neutral-900 font-medium" aria-current="page">
+                  {item.text}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </nav>
+  )
+}

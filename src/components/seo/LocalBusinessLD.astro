@@ -1,0 +1,123 @@
+---
+/**
+ * LocalBusiness JSON-LD Schema Component
+ *
+ * Outputs structured data for LocalBusiness schema.
+ * Used for location pages with physical addresses.
+ *
+ * @see https://schema.org/LocalBusiness
+ *
+ * @example
+ * ```astro
+ * <LocalBusinessLD
+ *   name="Acme Services - Austin Office"
+ *   address={{
+ *     street: "123 Main Street",
+ *     city: "Austin",
+ *     state: "TX",
+ *     zip: "78701"
+ *   }}
+ *   phone="(555) 123-4567"
+ *   geo={{ lat: 30.2672, lng: -97.7431 }}
+ *   openingHours={["Mo-Fr 09:00-17:00", "Sa 10:00-14:00"]}
+ * />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface LocalBusinessAddress {
+  /** Street address */
+  street: string;
+  /** City name */
+  city: string;
+  /** State/Province code */
+  state: string;
+  /** Postal/ZIP code */
+  zip: string;
+  /** Country (optional, defaults to "US") */
+  country?: string;
+}
+
+export interface GeoCoordinates {
+  /** Latitude */
+  lat: number;
+  /** Longitude */
+  lng: number;
+}
+
+export interface Props {
+  /** Business/location name */
+  name: string;
+  /** Physical address */
+  address: LocalBusinessAddress;
+  /** Phone number (optional) */
+  phone?: string;
+  /** Geographic coordinates (optional) */
+  geo?: GeoCoordinates;
+  /**
+   * Opening hours in Schema.org format (optional)
+   * Examples: "Mo-Fr 09:00-17:00", "Sa 10:00-14:00"
+   */
+  openingHours?: string[];
+}
+
+const { name, address, phone, geo, openingHours } = Astro.props;
+
+interface LocalBusinessSchema {
+  '@context': 'https://schema.org';
+  '@type': 'LocalBusiness';
+  name: string;
+  url: string;
+  address: {
+    '@type': 'PostalAddress';
+    streetAddress: string;
+    addressLocality: string;
+    addressRegion: string;
+    postalCode: string;
+    addressCountry: string;
+  };
+  telephone?: string;
+  geo?: {
+    '@type': 'GeoCoordinates';
+    latitude: number;
+    longitude: number;
+  };
+  openingHours?: string[];
+}
+
+const schema: LocalBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name,
+  url: siteConfig.seo.siteUrl,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: address.street,
+    addressLocality: address.city,
+    addressRegion: address.state,
+    postalCode: address.zip,
+    addressCountry: address.country ?? 'US',
+  },
+};
+
+if (phone) {
+  schema.telephone = phone;
+}
+
+if (geo) {
+  schema.geo = {
+    '@type': 'GeoCoordinates',
+    latitude: geo.lat,
+    longitude: geo.lng,
+  };
+}
+
+if (openingHours && openingHours.length > 0) {
+  schema.openingHours = openingHours;
+}
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

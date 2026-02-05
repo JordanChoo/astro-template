@@ -1,0 +1,111 @@
+[
+  {
+    "slug": "austin-tx",
+    "city": "Austin",
+    "state": "TX",
+    "address": "123 Main Street, Suite 500, Austin, TX 78701",
+    "phone": "(512) 555-1234",
+    "description": "Our flagship office in the heart of downtown Austin, serving the greater Central Texas region.",
+    "longDescription": "Our Austin headquarters is strategically located in downtown Austin, providing easy access to clients across the Central Texas region. This state-of-the-art facility houses our core consulting and implementation teams, enabling us to deliver comprehensive business solutions to organizations throughout Travis County and beyond. With dedicated meeting spaces and training facilities, we're equipped to host client workshops, strategic planning sessions, and hands-on implementation support. Our Austin team brings deep expertise in the local business landscape, having served hundreds of organizations ranging from emerging startups to established enterprises.",
+    "coordinates": {
+      "lat": 30.2672,
+      "lng": -97.7431
+    },
+    "serviceAreaKeywords": [
+      "Austin",
+      "Central Texas",
+      "Travis County",
+      "Round Rock",
+      "Cedar Park",
+      "Georgetown",
+      "San Marcos"
+    ],
+    "operatingHours": [
+      { "dayOfWeek": "Monday", "open": "08:00", "close": "18:00" },
+      { "dayOfWeek": "Tuesday", "open": "08:00", "close": "18:00" },
+      { "dayOfWeek": "Wednesday", "open": "08:00", "close": "18:00" },
+      { "dayOfWeek": "Thursday", "open": "08:00", "close": "18:00" },
+      { "dayOfWeek": "Friday", "open": "08:00", "close": "17:00" },
+      { "dayOfWeek": "Saturday", "open": "09:00", "close": "13:00" }
+    ]
+  },
+  {
+    "slug": "denver-co",
+    "city": "Denver",
+    "state": "CO",
+    "address": "456 Market Street, Floor 12, Denver, CO 80202",
+    "description": "Our Rocky Mountain regional office serving Colorado and the surrounding states.",
+    "longDescription": "The Denver office serves as our Rocky Mountain regional hub, providing expert consulting and implementation services to businesses throughout Colorado, Wyoming, and neighboring states. Located in the vibrant LoDo district, our team specializes in helping organizations navigate the unique challenges and opportunities of the Mountain West economy. From energy sector clients to growing tech companies, we bring tailored solutions that address regional market dynamics while maintaining our commitment to excellence. Our Denver team regularly collaborates with the Austin headquarters to ensure consistent service delivery across all client engagements.",
+    "coordinates": {
+      "lat": 39.7392,
+      "lng": -104.9903
+    },
+    "serviceAreaKeywords": [
+      "Denver",
+      "Colorado",
+      "Boulder",
+      "Fort Collins",
+      "Colorado Springs",
+      "Rocky Mountain Region",
+      "Front Range"
+    ],
+    "operatingHours": [
+      { "dayOfWeek": "Monday", "open": "09:00", "close": "17:00" },
+      { "dayOfWeek": "Tuesday", "open": "09:00", "close": "17:00" },
+      { "dayOfWeek": "Wednesday", "open": "09:00", "close": "17:00" },
+      { "dayOfWeek": "Thursday", "open": "09:00", "close": "17:00" },
+      { "dayOfWeek": "Friday", "open": "09:00", "close": "16:00" }
+    ]
+  },
+  {
+    "slug": "portland-or",
+    "city": "Portland",
+    "state": "OR",
+    "address": "789 Pearl District Way, Suite 200, Portland, OR 97209",
+    "phone": "(503) 555-9876",
+    "description": "Our Pacific Northwest office serving Oregon and Washington with innovative business solutions.",
+    "longDescription": "Our Portland location anchors our Pacific Northwest presence, delivering cutting-edge business solutions to organizations across Oregon, Washington, and the broader Cascadia region. Situated in the heart of the Pearl District, this office reflects our commitment to innovation and sustainability values that resonate deeply with Pacific Northwest businesses. The Portland team excels in working with creative industries, sustainable enterprises, and technology companies that define the region's economic landscape. We've built strong partnerships with local business communities and maintain active involvement in regional economic development initiatives.",
+    "serviceAreaKeywords": [
+      "Portland",
+      "Oregon",
+      "Pacific Northwest",
+      "Seattle",
+      "Washington",
+      "Cascadia",
+      "Willamette Valley",
+      "Eugene",
+      "Salem"
+    ]
+  },
+  {
+    "slug": "san-jose-ca",
+    "city": "San Jose",
+    "state": "CA",
+    "address": "1200 Innovation Drive, Building C, San Jose, CA 95134",
+    "phone": "(408) 555-4321",
+    "description": "Our Silicon Valley presence, specializing in technology sector consulting and analytics.",
+    "longDescription": "Strategically positioned in Silicon Valley, our San Jose office specializes in serving the unique needs of technology-driven organizations. From established tech giants to ambitious startups, we provide expert consulting in business strategy, implementation services, and advanced data analytics. Our team combines deep technical expertise with business acumen, enabling us to bridge the gap between technology capabilities and business outcomes. The San Jose location also serves as our center of excellence for data analytics services, developing innovative methodologies that we deploy across all our offices. Being embedded in the heart of the tech industry allows us to stay at the forefront of emerging trends and best practices.",
+    "coordinates": {
+      "lat": 37.3382,
+      "lng": -121.8863
+    },
+    "serviceAreaKeywords": [
+      "San Jose",
+      "Silicon Valley",
+      "Bay Area",
+      "Santa Clara",
+      "Palo Alto",
+      "Mountain View",
+      "Sunnyvale",
+      "Cupertino",
+      "San Francisco"
+    ],
+    "operatingHours": [
+      { "dayOfWeek": "Monday", "open": "07:00", "close": "19:00" },
+      { "dayOfWeek": "Tuesday", "open": "07:00", "close": "19:00" },
+      { "dayOfWeek": "Wednesday", "open": "07:00", "close": "19:00" },
+      { "dayOfWeek": "Thursday", "open": "07:00", "close": "19:00" },
+      { "dayOfWeek": "Friday", "open": "07:00", "close": "18:00" }
+    ]
+  }
+]

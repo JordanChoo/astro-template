@@ -1,0 +1,80 @@
+---
+/**
+ * ServiceCard.astro
+ *
+ * Reusable card component for displaying service summaries.
+ * Used in service listings and grid displays.
+ *
+ * @example
+ * ```astro
+ * <ServiceCard
+ *   slug="consulting"
+ *   title="Business Consulting"
+ *   description="Strategic consulting services..."
+ *   icon="briefcase"
+ * />
+ * ```
+ */
+
+import { getIconOrPlaceholder } from './icons/index';
+
+export interface Props {
+  /** Service slug for the detail page link */
+  slug: string;
+  /** Service title */
+  title: string;
+  /** Short description for the card */
+  description: string;
+  /** Icon key from the icons registry */
+  icon: string;
+}
+
+const { slug, title, description, icon } = Astro.props;
+
+// Get the icon SVG, falling back to placeholder if not found
+const iconSvg = getIconOrPlaceholder(icon);
+---
+
+<article
+  class="bg-white rounded-lg border border-neutral-200 p-6 hover:shadow-lg hover:border-primary-200 transition-all duration-200 group"
+>
+  <a href={`/services/${slug}`} class="block h-full">
+    <!-- Icon -->
+    <div
+      class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4 text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-200"
+    >
+      <div class="w-6 h-6" set:html={iconSvg} />
+    </div>
+
+    <!-- Title -->
+    <h2
+      class="text-xl font-semibold text-neutral-900 mb-3 group-hover:text-primary-600 transition-colors"
+    >
+      {title}
+    </h2>
+
+    <!-- Description -->
+    <p class="text-neutral-600 mb-4 line-clamp-3">
+      {description}
+    </p>
+
+    <!-- Learn more link -->
+    <span
+      class="inline-flex items-center text-primary-600 font-medium group-hover:text-primary-700"
+    >
+      Learn more
+      <svg
+        class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+      </svg>
+    </span>
+  </a>
+</article>

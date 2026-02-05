@@ -1,0 +1,116 @@
+---
+/**
+ * PostLayout.astro
+ *
+ * Layout for blog posts and articles. Extends PageLayout with post-specific
+ * metadata display: author, date, reading time, featured image, and tags.
+ */
+
+import PageLayout from './PageLayout.astro';
+
+interface Author {
+  name: string;
+  slug: string;
+}
+
+interface Props {
+  /** Post title */
+  title: string;
+  /** Post description/excerpt */
+  description: string;
+  /** Publication date */
+  pubDate: Date;
+  /** Author information */
+  author: Author;
+  /** Featured image URL (optional) */
+  image?: string;
+  /** Estimated reading time (e.g., "5 min read") */
+  readingTime: string;
+  /** Array of tag slugs */
+  tags: string[];
+}
+
+const { title, description: _description, pubDate, author, image, readingTime, tags } = Astro.props;
+
+// Format date for display
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(pubDate);
+
+// ISO date for datetime attribute
+const isoDate = pubDate.toISOString();
+---
+
+<PageLayout title={title}>
+  <slot name="head" slot="head" />
+
+  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <!-- Post Header -->
+    <header class="mb-8">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {title}
+      </h1>
+
+      <!-- Post Meta -->
+      <div class="flex flex-wrap items-center gap-4 text-neutral-600">
+        <!-- Author -->
+        <a
+          href={`/team/${author.slug}`}
+          class="font-medium text-primary-600 hover:text-primary-700 hover:underline"
+        >
+          {author.name}
+        </a>
+
+        <span class="text-neutral-400" aria-hidden="true">|</span>
+
+        <!-- Date -->
+        <time datetime={isoDate} class="text-neutral-600">
+          {formattedDate}
+        </time>
+
+        <span class="text-neutral-400" aria-hidden="true">|</span>
+
+        <!-- Reading Time -->
+        <span class="text-neutral-600">{readingTime}</span>
+      </div>
+    </header>
+
+    <!-- Featured Image -->
+    {
+      image && (
+        <figure class="mb-8">
+          <img src={image} alt="" class="w-full h-auto rounded-lg shadow-md" loading="eager" />
+        </figure>
+      )
+    }
+
+    <!-- Post Content (MDX slot) -->
+    <div class="prose prose-neutral prose-lg max-w-none">
+      <slot />
+    </div>
+
+    <!-- Tags -->
+    {
+      tags.length > 0 && (
+        <footer class="mt-12 pt-8 border-t border-neutral-200">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-neutral-600 font-medium">Tags:</span>
+            {tags.map((tag) => (
+              <a
+                href={`/blog/tags/${tag}`}
+                class="inline-block px-3 py-1 text-sm bg-neutral-100 text-neutral-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        </footer>
+      )
+    }
+
+    <!-- Related Posts Placeholder -->
+    <!-- TODO: Implement related posts section based on tags/categories -->
+  </article>
+</PageLayout>

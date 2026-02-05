@@ -1,0 +1,60 @@
+---
+/**
+ * BaseLayout.astro
+ *
+ * The foundational HTML shell layout for all pages.
+ * Provides document structure, global styles, fonts, favicons, and GTM injection.
+ */
+
+import '../styles/global.css';
+import siteConfig from '../config/site';
+import GTM from '../components/GTM.astro';
+import GTMNoscript from '../components/GTMNoscript.astro';
+
+interface Props {
+  /** Page title - will be used with title template from config */
+  title: string;
+}
+
+const { title } = Astro.props;
+const { seo } = siteConfig;
+
+// Format title using the template from config
+const formattedTitle = seo.titleTemplate.replace('%s', title);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{formattedTitle}</title>
+
+    <!-- Slot for SEO component (meta tags, OG tags, etc.) -->
+    <slot name="head" />
+
+    <!-- Favicon references -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Google Fonts - Inter with preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Google Tag Manager (conditional on gtmId in config) -->
+    <GTM />
+  </head>
+  <body class="bg-neutral-50 text-neutral-900 font-sans antialiased">
+    <!-- Google Tag Manager noscript fallback -->
+    <GTMNoscript />
+
+    <slot />
+  </body>
+</html>

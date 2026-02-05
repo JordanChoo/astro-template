@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+@theme {
+  /* Color Palette - Semantic */
+  --color-primary-50: oklch(0.97 0.01 250);
+  --color-primary-100: oklch(0.93 0.02 250);
+  --color-primary-200: oklch(0.86 0.04 250);
+  --color-primary-300: oklch(0.76 0.08 250);
+  --color-primary-400: oklch(0.64 0.12 250);
+  --color-primary-500: oklch(0.53 0.15 250);
+  --color-primary-600: oklch(0.45 0.14 250);
+  --color-primary-700: oklch(0.38 0.12 250);
+  --color-primary-800: oklch(0.32 0.1 250);
+  --color-primary-900: oklch(0.27 0.08 250);
+  --color-primary-950: oklch(0.2 0.06 250);
+
+  --color-secondary-50: oklch(0.97 0.01 180);
+  --color-secondary-100: oklch(0.93 0.02 180);
+  --color-secondary-200: oklch(0.86 0.04 180);
+  --color-secondary-300: oklch(0.76 0.06 180);
+  --color-secondary-400: oklch(0.64 0.08 180);
+  --color-secondary-500: oklch(0.53 0.1 180);
+  --color-secondary-600: oklch(0.45 0.09 180);
+  --color-secondary-700: oklch(0.38 0.08 180);
+  --color-secondary-800: oklch(0.32 0.06 180);
+  --color-secondary-900: oklch(0.27 0.05 180);
+  --color-secondary-950: oklch(0.2 0.04 180);
+
+  --color-accent-50: oklch(0.97 0.02 60);
+  --color-accent-100: oklch(0.94 0.04 60);
+  --color-accent-200: oklch(0.88 0.08 60);
+  --color-accent-300: oklch(0.8 0.12 60);
+  --color-accent-400: oklch(0.72 0.16 60);
+  --color-accent-500: oklch(0.65 0.18 60);
+  --color-accent-600: oklch(0.55 0.16 60);
+  --color-accent-700: oklch(0.45 0.14 60);
+  --color-accent-800: oklch(0.38 0.1 60);
+  --color-accent-900: oklch(0.3 0.08 60);
+  --color-accent-950: oklch(0.22 0.06 60);
+
+  --color-neutral-50: oklch(0.98 0 0);
+  --color-neutral-100: oklch(0.96 0 0);
+  --color-neutral-200: oklch(0.9 0 0);
+  --color-neutral-300: oklch(0.82 0 0);
+  --color-neutral-400: oklch(0.7 0 0);
+  --color-neutral-500: oklch(0.55 0 0);
+  --color-neutral-600: oklch(0.45 0 0);
+  --color-neutral-700: oklch(0.37 0 0);
+  --color-neutral-800: oklch(0.27 0 0);
+  --color-neutral-900: oklch(0.2 0 0);
+  --color-neutral-950: oklch(0.14 0 0);
+
+  /* Font Families */
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Spacing Scale Extensions */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-30: 7.5rem;
+}

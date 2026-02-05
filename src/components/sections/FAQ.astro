@@ -1,0 +1,109 @@
+---
+/**
+ * FAQ Section Component
+ *
+ * Accordion-style FAQ section using native <details>/<summary> elements.
+ * Fully accessible with keyboard navigation support.
+ * Includes FAQLD component for JSON-LD structured data.
+ *
+ * @example
+ * ```astro
+ * <FAQ
+ *   items={[
+ *     { question: "What services do you offer?", answer: "We offer..." }
+ *   ]}
+ * />
+ * ```
+ */
+
+import FAQLD from '../seo/FAQLD.astro';
+
+export interface FAQItem {
+  /** Question text */
+  question: string;
+  /** Answer text */
+  answer: string;
+}
+
+export interface Props {
+  /** Array of FAQ items to display */
+  items: FAQItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="py-16 sm:py-20 lg:py-24 bg-white">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12 lg:mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
+        Frequently Asked Questions
+      </h2>
+      <p class="text-lg text-neutral-600">
+        Have questions? We have answers. If you do not find what you are looking for, feel free to
+        contact us.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      {
+        items.map((item, index) => (
+          <details class="group bg-neutral-50 rounded-lg overflow-hidden" data-faq-item={index}>
+            <summary class="flex items-center justify-between cursor-pointer p-5 sm:p-6 text-left font-semibold text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-colors select-none list-none">
+              <span class="pr-4">{item.question}</span>
+              <span class="flex-shrink-0 ml-2">
+                <svg
+                  class="w-5 h-5 text-neutral-500 group-open:rotate-180 transition-transform duration-200"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div class="px-5 sm:px-6 pb-5 sm:pb-6">
+              <p class="text-neutral-600 leading-relaxed">{item.answer}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+
+  {/* JSON-LD structured data for FAQ */}
+  <FAQLD items={items} />
+</section>
+
+<style>
+  /* Remove default marker from summary */
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details summary::marker {
+    display: none;
+  }
+
+  /* Smooth content reveal animation */
+  details[open] > div {
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

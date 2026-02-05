@@ -1,0 +1,83 @@
+---
+/**
+ * Team Listing Page
+ *
+ * Displays a responsive grid of all team members.
+ * Shows name, avatar, and role for each member.
+ * Includes "No team members yet" empty state.
+ */
+
+import { getCollection } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import SEO from '@/components/SEO.astro';
+import TeamCard from '@/components/TeamCard.astro';
+import { getListingMeta } from '@/data/pages.schema';
+
+const currentPath = Astro.url.pathname;
+
+// Get page metadata from pages.json
+const pageMeta = getListingMeta('team');
+
+// Get all team members sorted alphabetically by name
+const allTeamMembers = await getCollection('team');
+const teamMembers = allTeamMembers.sort((a, b) => a.data.name.localeCompare(b.data.name));
+---
+
+<PageLayout title={pageMeta.title}>
+  <Fragment slot="head">
+    <SEO title={pageMeta.title} description={pageMeta.description} />
+  </Fragment>
+
+  <Breadcrumbs currentPath={currentPath} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {pageMeta.title}
+      </h1>
+      <p class="text-lg sm:text-xl text-neutral-600 max-w-3xl mx-auto">
+        {pageMeta.description}
+      </p>
+    </div>
+
+    {
+      teamMembers.length > 0 ? (
+        /* Team Members Grid */
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+          {teamMembers.map((member) => (
+            <TeamCard
+              slug={member.data.slug}
+              name={member.data.name}
+              avatar={member.data.avatar}
+              role={member.data.role}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div class="text-center py-16">
+          <div class="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              class="w-8 h-8 text-neutral-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+              />
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-neutral-700 mb-2">No team members yet</h2>
+          <p class="text-neutral-500">Check back soon to meet our team.</p>
+        </div>
+      )
+    }
+  </div>
+</PageLayout>

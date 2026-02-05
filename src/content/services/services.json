@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "consulting",
+    "title": "Business Consulting",
+    "description": "Strategic consulting services to help your business grow and succeed in today's competitive market.",
+    "longDescription": "Our business consulting services provide comprehensive strategic guidance to help organizations navigate complex challenges and achieve their goals. We work closely with your team to understand your unique needs, analyze market conditions, and develop actionable strategies that drive measurable results. Our experienced consultants bring industry expertise and proven methodologies to every engagement, ensuring you receive practical recommendations that can be implemented effectively. Whether you're looking to expand into new markets, optimize operations, or transform your business model, we're here to guide you every step of the way.",
+    "icon": "briefcase",
+    "features": [
+      {
+        "title": "Strategic Planning",
+        "description": "Develop comprehensive business strategies aligned with your long-term vision and objectives."
+      },
+      {
+        "title": "Market Analysis",
+        "description": "In-depth research and analysis of market trends, competitors, and growth opportunities."
+      },
+      {
+        "title": "Process Optimization",
+        "description": "Identify inefficiencies and implement improvements to streamline your operations."
+      },
+      {
+        "title": "Growth Strategy",
+        "description": "Create sustainable growth plans with clear milestones and measurable outcomes."
+      }
+    ],
+    "cta": {
+      "text": "Schedule a Consultation",
+      "link": "/contact"
+    },
+    "order": 1
+  },
+  {
+    "slug": "implementation",
+    "title": "Implementation Services",
+    "description": "Expert implementation and deployment services to bring your projects from concept to reality.",
+    "longDescription": "Our implementation services transform your strategic plans into operational reality. We understand that the gap between planning and execution is where many initiatives fail, which is why we've developed a rigorous implementation methodology that ensures successful outcomes. Our team works alongside yours to manage every aspect of the deployment process, from initial setup and configuration to training and ongoing optimization. We focus on minimizing disruption to your operations while maximizing the value delivered by each implementation project. With our structured approach, you can be confident that your investments will deliver the expected returns.",
+    "icon": "cog",
+    "features": [
+      {
+        "title": "Project Management",
+        "description": "End-to-end project management with clear timelines, milestones, and deliverables."
+      },
+      {
+        "title": "System Integration",
+        "description": "Seamless integration of new solutions with your existing systems and workflows."
+      },
+      {
+        "title": "Change Management",
+        "description": "Support your team through transitions with comprehensive change management practices."
+      },
+      {
+        "title": "Training & Documentation",
+        "description": "Thorough training programs and documentation to ensure successful adoption."
+      }
+    ],
+    "cta": {
+      "text": "Start Your Project",
+      "link": "/contact"
+    },
+    "order": 2
+  },
+  {
+    "slug": "support",
+    "title": "Ongoing Support",
+    "description": "Reliable ongoing support and maintenance services to keep your operations running smoothly.",
+    "longDescription": "Our ongoing support services ensure that your systems and processes continue to perform at their best long after implementation. We offer flexible support packages tailored to your specific needs, from basic maintenance and monitoring to comprehensive managed services. Our dedicated support team is available when you need them, providing rapid response to issues and proactive maintenance to prevent problems before they occur. We also provide regular reviews and optimization recommendations to help you get the most value from your investments. With our support services, you can focus on your core business while we handle the technical details.",
+    "icon": "shield",
+    "features": [
+      {
+        "title": "24/7 Monitoring",
+        "description": "Continuous monitoring of your systems to detect and address issues proactively."
+      },
+      {
+        "title": "Help Desk Services",
+        "description": "Responsive help desk support with guaranteed response times and resolution tracking."
+      },
+      {
+        "title": "Regular Maintenance",
+        "description": "Scheduled maintenance and updates to keep your systems secure and performing optimally."
+      },
+      {
+        "title": "Performance Optimization",
+        "description": "Ongoing analysis and recommendations to improve system performance and efficiency."
+      }
+    ],
+    "cta": {
+      "text": "Get Support",
+      "link": "/contact"
+    },
+    "order": 3
+  },
+  {
+    "slug": "analytics",
+    "title": "Data Analytics",
+    "description": "Transform your data into actionable insights with our comprehensive analytics solutions.",
+    "longDescription": "Our data analytics services help you unlock the full potential of your business data. In today's data-driven world, organizations that can effectively collect, analyze, and act on information have a significant competitive advantage. We provide end-to-end analytics solutions that cover everything from data collection and warehousing to advanced visualization and predictive modeling. Our team combines technical expertise with business acumen to ensure that our analytics solutions deliver meaningful insights that drive better decision-making. Whether you need basic reporting dashboards or sophisticated machine learning models, we have the capabilities to meet your needs.",
+    "icon": "chart",
+    "features": [
+      {
+        "title": "Data Integration",
+        "description": "Consolidate data from multiple sources into a unified, accessible data platform."
+      },
+      {
+        "title": "Custom Dashboards",
+        "description": "Interactive dashboards and reports tailored to your specific KPIs and metrics."
+      },
+      {
+        "title": "Predictive Analytics",
+        "description": "Advanced modeling to forecast trends and anticipate future business outcomes."
+      },
+      {
+        "title": "Data Governance",
+        "description": "Establish robust data governance practices to ensure quality and compliance."
+      }
+    ],
+    "cta": {
+      "text": "Explore Analytics",
+      "link": "/contact"
+    },
+    "order": 4
+  }
+]

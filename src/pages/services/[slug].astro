@@ -1,0 +1,172 @@
+---
+/**
+ * Service Detail Page
+ *
+ * Dynamic page for individual service details.
+ * Includes service title, icon, long description, features list, and CTA.
+ */
+
+import PageLayout from '../../layouts/PageLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SEO from '../../components/SEO.astro';
+import ServiceLD from '../../components/seo/ServiceLD.astro';
+import BreadcrumbLD from '../../components/seo/BreadcrumbLD.astro';
+import { getIconOrPlaceholder } from '../../components/icons/index';
+import { getAllServiceSlugs, getServiceBySlug } from '../../content/services/services.schema';
+
+export function getStaticPaths() {
+  const slugs = getAllServiceSlugs();
+  return slugs.map((slug) => ({
+    params: { slug },
+  }));
+}
+
+interface Props {
+  params: { slug: string };
+}
+
+const { slug } = Astro.params;
+const currentPath = Astro.url.pathname;
+
+// Get the service data
+const service = getServiceBySlug(slug);
+
+// Handle case where service is not found (should not happen with getStaticPaths)
+if (!service) {
+  return Astro.redirect('/404');
+}
+
+// Get the icon SVG
+const iconSvg = getIconOrPlaceholder(service.icon);
+
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Services', url: '/services' },
+  { name: service.title, url: `/services/${service.slug}` },
+];
+---
+
+<PageLayout title={service.title}>
+  <Fragment slot="head">
+    <SEO title={service.title} description={service.description} />
+    <ServiceLD name={service.title} description={service.description} />
+    <BreadcrumbLD items={breadcrumbItems} />
+  </Fragment>
+
+  <Breadcrumbs currentPath={currentPath} />
+
+  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <!-- Service Header -->
+    <header class="mb-12">
+      <!-- Icon -->
+      <div
+        class="w-16 h-16 bg-primary-100 rounded-xl flex items-center justify-center mb-6 text-primary-600"
+      >
+        <div class="w-8 h-8" set:html={iconSvg} />
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {service.title}
+      </h1>
+
+      <!-- Short Description -->
+      <p class="text-lg sm:text-xl text-neutral-600">
+        {service.description}
+      </p>
+    </header>
+
+    <!-- Long Description -->
+    <section class="mb-12">
+      <div class="prose prose-neutral prose-lg max-w-none">
+        <p class="text-neutral-700 leading-relaxed">
+          {service.longDescription}
+        </p>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-neutral-900 mb-6">What We Offer</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {
+          service.features.map((feature) => (
+            <div class="bg-neutral-50 rounded-lg p-6 border border-neutral-200">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1">
+                  <svg
+                    class="w-4 h-4 text-primary-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4.5 12.75l6 6 9-13.5"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-neutral-900 mb-2">{feature.title}</h3>
+                  <p class="text-neutral-600">{feature.description}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary-50 rounded-2xl p-8 sm:p-12 text-center border border-primary-100">
+      <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 mb-4">Ready to Get Started?</h2>
+      <p class="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
+        Let us help you achieve your goals with our {service.title.toLowerCase()} expertise.
+      </p>
+      <a
+        href={service.cta.link}
+        class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+      >
+        {service.cta.text}
+        <svg
+          class="ml-2 w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+        </svg>
+      </a>
+    </section>
+
+    <!-- Back to Services Link -->
+    <div class="mt-12 pt-8 border-t border-neutral-200">
+      <a
+        href="/services"
+        class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
+      >
+        <svg
+          class="mr-2 w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+        </svg>
+        Back to all services
+      </a>
+    </div>
+  </article>
+</PageLayout>

@@ -1,0 +1,85 @@
+---
+/**
+ * Hero Section Component
+ *
+ * Full-width hero section for the homepage with headline,
+ * subheadline, and call-to-action button.
+ *
+ * @example
+ * ```astro
+ * <Hero
+ *   headline="Welcome to Our Site"
+ *   subheadline="We help you succeed"
+ *   cta={{ text: "Get Started", link: "/contact" }}
+ * />
+ * ```
+ */
+
+export interface Props {
+  /** Main headline text */
+  headline: string;
+  /** Supporting subheadline text */
+  subheadline: string;
+  /** Call-to-action button configuration */
+  cta: {
+    text: string;
+    link: string;
+  };
+}
+
+const { headline, subheadline, cta } = Astro.props;
+---
+
+<section
+  class="relative bg-gradient-to-br from-primary-50 to-primary-100 min-h-[60vh] flex items-center"
+>
+  <div class="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8 w-full">
+    <div class="text-center max-w-4xl mx-auto">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+        {headline}
+      </h1>
+
+      <p
+        class="text-lg sm:text-xl lg:text-2xl text-neutral-600 mb-10 max-w-3xl mx-auto leading-relaxed"
+      >
+        {subheadline}
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href={cta.link}
+          class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors shadow-lg hover:shadow-xl"
+        >
+          {cta.text}
+          <svg
+            class="ml-2 w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative bottom wave -->
+  <div class="absolute bottom-0 left-0 right-0 overflow-hidden" aria-hidden="true">
+    <svg
+      class="w-full h-12 sm:h-16 text-white"
+      viewBox="0 0 1200 120"
+      preserveAspectRatio="none"
+      fill="currentColor"
+    >
+      <path
+        d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+      ></path>
+    </svg>
+  </div>
+</section>

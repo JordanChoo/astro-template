@@ -1,0 +1,134 @@
+---
+/**
+ * BlogPosting JSON-LD Schema Component
+ *
+ * Outputs structured data for BlogPosting schema.
+ * Used on individual blog post pages.
+ *
+ * @see https://schema.org/BlogPosting
+ *
+ * @example
+ * ```astro
+ * <BlogPostingLD
+ *   headline="My Blog Post Title"
+ *   description="A brief description of the post"
+ *   datePublished="2024-01-15"
+ *   author={{ name: "John Doe", url: "https://example.com/team/john-doe" }}
+ *   image="/images/blog/post-image.jpg"
+ * />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface BlogPostAuthor {
+  /** Author's full name */
+  name: string;
+  /** URL to author's profile page (optional) */
+  url?: string;
+}
+
+export interface Props {
+  /** Article headline (typically the post title) */
+  headline: string;
+  /** Article description/excerpt */
+  description: string;
+  /** Publication date in ISO 8601 format (YYYY-MM-DD or full ISO string) */
+  datePublished: string;
+  /** Author information */
+  author: BlogPostAuthor;
+  /** Featured image URL (optional, absolute or relative) */
+  image?: string;
+  /** Last modified date in ISO 8601 format (optional) */
+  dateModified?: string;
+}
+
+const { headline, description, datePublished, author, image, dateModified } = Astro.props;
+
+// Resolve image URL to absolute
+function resolveUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return new URL(path, siteConfig.seo.siteUrl).href;
+}
+
+interface PersonSchema {
+  '@type': 'Person';
+  name: string;
+  url?: string;
+}
+
+interface BlogPostingSchema {
+  '@context': 'https://schema.org';
+  '@type': 'BlogPosting';
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+  author: PersonSchema;
+  publisher: {
+    '@type': 'Organization';
+    name: string;
+    url: string;
+    logo?: {
+      '@type': 'ImageObject';
+      url: string;
+    };
+  };
+  image?: string;
+  mainEntityOfPage: {
+    '@type': 'WebPage';
+    '@id': string;
+  };
+}
+
+const authorSchema: PersonSchema = {
+  '@type': 'Person',
+  name: author.name,
+};
+if (author.url) {
+  authorSchema.url = author.url;
+}
+
+const publisherSchema: BlogPostingSchema['publisher'] = {
+  '@type': 'Organization',
+  name: siteConfig.name,
+  url: siteConfig.seo.siteUrl,
+};
+if (siteConfig.logo) {
+  publisherSchema.logo = {
+    '@type': 'ImageObject',
+    url: resolveUrl(siteConfig.logo) ?? '',
+  };
+}
+
+const schema: BlogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline,
+  description,
+  datePublished,
+  author: authorSchema,
+  publisher: publisherSchema,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': new URL(Astro.url.pathname, siteConfig.seo.siteUrl).href,
+  },
+};
+
+if (dateModified) {
+  schema.dateModified = dateModified;
+}
+
+const resolvedImage = resolveUrl(image);
+if (resolvedImage) {
+  schema.image = resolvedImage;
+}
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

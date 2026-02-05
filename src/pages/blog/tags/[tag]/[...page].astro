@@ -1,0 +1,223 @@
+---
+/**
+ * Tag Archive Page with Pagination
+ *
+ * Displays posts filtered by a specific tag.
+ * Paginated at 9 posts per page, reverse chronological order.
+ *
+ * Routes:
+ * - /blog/tags/[tag]/ - First page
+ * - /blog/tags/[tag]/2/, etc. - Subsequent pages
+ */
+
+import { getCollection, getEntry } from 'astro:content';
+import type { GetStaticPathsOptions, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import SEO from '@/components/SEO.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import PostCard from '@/components/PostCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import pagesData from '@/data/pages.json';
+
+type BlogPost = CollectionEntry<'blog'>;
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  // Define constants and helpers inside getStaticPaths for Astro compilation
+  const POSTS_PER_PAGE = 9;
+
+  const slugifyTag = (tag: string): string => {
+    return tag.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  const allPosts = await getCollection('blog');
+
+  // Filter drafts in production
+  const isProduction = import.meta.env.PROD;
+  const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+
+  // Collect all unique tags (normalized)
+  const tagMap = new Map<string, { display: string; slug: string }>();
+
+  for (const post of visiblePosts) {
+    for (const tag of post.data.tags) {
+      const slug = slugifyTag(tag);
+      if (!tagMap.has(slug)) {
+        tagMap.set(slug, { display: tag, slug });
+      }
+    }
+  }
+
+  // Generate paginated paths for each tag
+  const paths = [];
+
+  for (const [tagSlug, tagData] of tagMap) {
+    // Filter posts that have this tag
+    const tagPosts = visiblePosts.filter((post) =>
+      post.data.tags.some((t) => slugifyTag(t) === tagSlug)
+    );
+
+    // Sort by publication date (newest first)
+    const sortedPosts = tagPosts.sort(
+      (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+    );
+
+    // Generate paginated paths for this tag
+    const paginatedPaths = paginate(sortedPosts, {
+      params: { tag: tagSlug },
+      props: { tagDisplay: tagData.display, tagSlug },
+      pageSize: POSTS_PER_PAGE,
+    });
+
+    paths.push(...paginatedPaths);
+  }
+
+  return paths;
+}
+
+interface Props {
+  page: Page<BlogPost>;
+  tagDisplay: string;
+  tagSlug: string;
+}
+
+const { page, tagDisplay, tagSlug } = Astro.props;
+
+// Handle redirect from /blog/tags/[tag]/1/ to /blog/tags/[tag]/
+const params = Astro.params;
+const pageParam = params.page;
+
+if (pageParam === '1') {
+  return Astro.redirect(`/blog/tags/${tagSlug}/`, 301);
+}
+
+// Validate page number
+const currentPage = page.currentPage;
+const totalPages = page.lastPage;
+
+if (currentPage > totalPages && totalPages > 0) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not Found',
+  });
+}
+
+// Get page SEO data from templates
+const tagsSeoData = pagesData.taxonomies.tags;
+const pageTitle = tagsSeoData.titleTemplate.replace('%s', tagDisplay);
+const pageDescription = tagsSeoData.descriptionTemplate.replace('%s', tagDisplay);
+
+// Fetch author data for each post
+const postsWithAuthors = await Promise.all(
+  page.data.map(async (post) => {
+    const author = await getEntry(post.data.author);
+    return {
+      post,
+      author: author
+        ? { name: author.data.name, slug: author.data.slug }
+        : { name: 'Unknown Author', slug: '' },
+    };
+  })
+);
+
+const isProduction = import.meta.env.PROD;
+---
+
+<PageLayout title={pageTitle}>
+  <SEO
+    slot="head"
+    title={currentPage > 1 ? `${pageTitle} - Page ${currentPage}` : pageTitle}
+    description={pageDescription}
+    canonicalUrl={currentPage === 1 ? `/blog/tags/${tagSlug}/` : undefined}
+  />
+
+  <Breadcrumbs currentPath={Astro.url.pathname} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <header class="text-center mb-12">
+      <div
+        class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full mb-4"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+          ></path>
+        </svg>
+        <span class="font-medium">Tag</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {tagDisplay}
+      </h1>
+      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+        {page.total}
+        {page.total === 1 ? 'post' : 'posts'} tagged with "{tagDisplay}"
+      </p>
+    </header>
+
+    {/* Posts Grid */}
+    {
+      postsWithAuthors.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {postsWithAuthors.map(({ post, author }) => (
+            <PostCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              author={author}
+              tags={post.data.tags}
+              image={post.data.image}
+              isDraft={!isProduction && post.data.draft}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-neutral-600">No posts found with this tag.</p>
+        </div>
+      )
+    }
+
+    {/* Pagination */}
+    {
+      totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          basePath={`/blog/tags/${tagSlug}`}
+        />
+      )
+    }
+
+    {/* Back to Tags Link */}
+    <div class="text-center mt-12">
+      <a
+        href="/blog/tags/"
+        class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        View all tags
+      </a>
+    </div>
+  </div>
+</PageLayout>

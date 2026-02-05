@@ -1,0 +1,118 @@
+---
+/**
+ * Privacy Policy Page
+ *
+ * Boilerplate privacy policy placeholder.
+ * Replace with actual privacy policy content.
+ */
+
+import PageLayout from '../layouts/PageLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import siteConfig from '../config/site';
+
+const currentPath = Astro.url.pathname;
+const currentYear = new Date().getFullYear();
+---
+
+<PageLayout title="Privacy Policy">
+  <Breadcrumbs currentPath={currentPath} />
+
+  <div class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">Privacy Policy</h1>
+
+    <p class="text-neutral-600 mb-8">
+      Last updated: January 1, {currentYear}
+    </p>
+
+    <div class="prose prose-neutral prose-lg max-w-none">
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Introduction</h2>
+        <p class="text-neutral-700">
+          {siteConfig.name} ("we," "our," or "us") is committed to protecting your privacy. This Privacy
+          Policy explains how we collect, use, disclose, and safeguard your information when you visit
+          our website.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Information We Collect</h2>
+        <p class="text-neutral-700 mb-4">
+          We may collect information about you in a variety of ways, including:
+        </p>
+        <ul class="list-disc list-inside text-neutral-700 space-y-2">
+          <li>Personal data you voluntarily provide (name, email, phone number)</li>
+          <li>
+            Information automatically collected (IP address, browser type, device information)
+          </li>
+          <li>Cookies and similar tracking technologies</li>
+        </ul>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">How We Use Your Information</h2>
+        <p class="text-neutral-700 mb-4">We may use information collected about you to:</p>
+        <ul class="list-disc list-inside text-neutral-700 space-y-2">
+          <li>Provide, operate, and maintain our website</li>
+          <li>Improve, personalize, and expand our services</li>
+          <li>Communicate with you, including for customer service</li>
+          <li>Send you emails and marketing communications</li>
+          <li>Find and prevent fraud</li>
+        </ul>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Disclosure of Your Information</h2>
+        <p class="text-neutral-700">
+          We may share information we have collected about you in certain situations, including with
+          service providers, for business transfers, with your consent, or to comply with legal
+          obligations.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Cookies and Tracking</h2>
+        <p class="text-neutral-700">
+          We may use cookies, web beacons, and other tracking technologies to collect information
+          about your browsing activities. You can control cookies through your browser settings.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Your Rights</h2>
+        <p class="text-neutral-700">
+          Depending on your location, you may have certain rights regarding your personal
+          information, including the right to access, correct, or delete your data. Please contact
+          us to exercise these rights.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 mb-4">Contact Us</h2>
+        <p class="text-neutral-700">
+          If you have questions about this Privacy Policy, please contact us at:
+        </p>
+        <address class="not-italic mt-4 text-neutral-700">
+          <p class="font-medium">{siteConfig.name}</p>
+          {
+            siteConfig.address && (
+              <>
+                <p>{siteConfig.address.street}</p>
+                <p>
+                  {siteConfig.address.city}, {siteConfig.address.state} {siteConfig.address.zip}
+                </p>
+              </>
+            )
+          }
+          {siteConfig.phone && <p class="mt-2">{siteConfig.phone}</p>}
+        </address>
+      </section>
+
+      <div class="mt-12 p-6 bg-neutral-100 rounded-lg">
+        <p class="text-sm text-neutral-600">
+          <strong>Disclaimer:</strong> This is placeholder privacy policy content. Please consult with
+          a legal professional to create a privacy policy appropriate for your business and jurisdiction.
+        </p>
+      </div>
+    </div>
+  </div>
+</PageLayout>

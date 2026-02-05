@@ -1,0 +1,30 @@
+{
+  "listings": {
+    "blog": {
+      "title": "Blog",
+      "description": "Read our latest articles on business solutions, industry insights, and company news."
+    },
+    "services": {
+      "title": "Our Services",
+      "description": "Explore our comprehensive range of professional business solutions and consulting services."
+    },
+    "locations": {
+      "title": "Locations",
+      "description": "Find our offices and service areas. We provide professional services across multiple locations."
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "Meet the dedicated professionals behind our success. Learn about our team's expertise and experience."
+    }
+  },
+  "taxonomies": {
+    "tags": {
+      "titleTemplate": "Posts tagged \"%s\"",
+      "descriptionTemplate": "Browse all articles and content tagged with \"%s\"."
+    },
+    "categories": {
+      "titleTemplate": "\"%s\" Articles",
+      "descriptionTemplate": "Explore our collection of articles in the \"%s\" category."
+    }
+  }
+}

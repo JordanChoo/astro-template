@@ -1,0 +1,50 @@
+---
+/**
+ * Stats Section Component
+ *
+ * Displays key statistics in a responsive row layout.
+ *
+ * @example
+ * ```astro
+ * <Stats
+ *   stats={[
+ *     { value: "500+", label: "Clients" },
+ *     { value: "99%", label: "Satisfaction" }
+ *   ]}
+ * />
+ * ```
+ */
+
+export interface StatItem {
+  /** Stat value (e.g., "500+", "99%", "$1M") */
+  value: string;
+  /** Stat label describing the value */
+  label: string;
+}
+
+export interface Props {
+  /** Array of stat items to display */
+  stats: StatItem[];
+}
+
+const { stats } = Astro.props;
+---
+
+<section class="py-16 sm:py-20 bg-primary-600">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      {
+        stats.map((stat) => (
+          <div class="text-center">
+            <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2">
+              {stat.value}
+            </div>
+            <div class="text-primary-100 text-sm sm:text-base font-medium uppercase tracking-wide">
+              {stat.label}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

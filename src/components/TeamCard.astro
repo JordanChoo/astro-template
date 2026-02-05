@@ -1,0 +1,83 @@
+---
+/**
+ * TeamCard.astro
+ *
+ * Reusable card component for displaying team member summaries.
+ * Used in team listings and grid displays.
+ *
+ * @example
+ * ```astro
+ * <TeamCard
+ *   slug="john-doe"
+ *   name="John Doe"
+ *   avatar="/images/team/john-doe.jpg"
+ *   role="Senior Developer"
+ * />
+ * ```
+ */
+
+export interface Props {
+  /** Team member slug for the detail page link */
+  slug: string;
+  /** Team member's full name */
+  name: string;
+  /** Path to avatar image */
+  avatar: string;
+  /** Job title or role */
+  role: string;
+}
+
+const { slug, name, avatar, role } = Astro.props;
+---
+
+<article
+  class="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg hover:border-primary-200 transition-all duration-200 group"
+>
+  <a href={`/team/${slug}/`} class="block h-full">
+    {/* Avatar Section */}
+    <div class="aspect-square overflow-hidden bg-neutral-100">
+      {
+        avatar ? (
+          <img
+            src={avatar}
+            alt={`${name} - ${role}`}
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+        ) : (
+          <div class="w-full h-full flex items-center justify-center bg-neutral-100">
+            <svg
+              class="w-24 h-24 text-neutral-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+              />
+            </svg>
+          </div>
+        )
+      }
+    </div>
+
+    {/* Content Section */}
+    <div class="p-5 text-center">
+      {/* Name */}
+      <h2
+        class="text-xl font-semibold text-neutral-900 mb-1 group-hover:text-primary-600 transition-colors"
+      >
+        {name}
+      </h2>
+
+      {/* Role */}
+      <p class="text-neutral-600 text-sm">
+        {role}
+      </p>
+    </div>
+  </a>
+</article>

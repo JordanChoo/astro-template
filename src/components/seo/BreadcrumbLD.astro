@@ -1,0 +1,74 @@
+---
+/**
+ * BreadcrumbList JSON-LD Schema Component
+ *
+ * Outputs structured data for BreadcrumbList schema.
+ * Helps search engines understand site hierarchy.
+ *
+ * @see https://schema.org/BreadcrumbList
+ *
+ * @example
+ * ```astro
+ * <BreadcrumbLD
+ *   items={[
+ *     { name: "Home", url: "/" },
+ *     { name: "Blog", url: "/blog/" },
+ *     { name: "My Post Title", url: "/blog/my-post/" }
+ *   ]}
+ * />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface BreadcrumbItem {
+  /** Display name for the breadcrumb */
+  name: string;
+  /** URL path (can be relative or absolute) */
+  url: string;
+}
+
+export interface Props {
+  /** Ordered list of breadcrumb items (from root to current page) */
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+
+// Resolve URL to absolute
+function resolveUrl(url: string): string {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return new URL(path, siteConfig.seo.siteUrl).href;
+}
+
+interface ListItemSchema {
+  '@type': 'ListItem';
+  position: number;
+  name: string;
+  item: string;
+}
+
+interface BreadcrumbListSchema {
+  '@context': 'https://schema.org';
+  '@type': 'BreadcrumbList';
+  itemListElement: ListItemSchema[];
+}
+
+const schema: BreadcrumbListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: resolveUrl(item.url),
+  })),
+};
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

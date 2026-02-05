@@ -1,0 +1,93 @@
+---
+/**
+ * Organization JSON-LD Schema Component
+ *
+ * Outputs structured data for Organization schema.
+ * Uses site config for business name, logo, contact info, and social profiles.
+ *
+ * @see https://schema.org/Organization
+ *
+ * @example
+ * ```astro
+ * <OrganizationLD />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+// Build the Organization schema object
+interface OrganizationSchema {
+  '@context': 'https://schema.org';
+  '@type': 'Organization';
+  name: string;
+  url: string;
+  logo?: string;
+  contactPoint?: {
+    '@type': 'ContactPoint';
+    telephone: string;
+    contactType: 'customer service';
+  };
+  address?: {
+    '@type': 'PostalAddress';
+    streetAddress: string;
+    addressLocality: string;
+    addressRegion: string;
+    postalCode: string;
+  };
+  sameAs?: string[];
+}
+
+const schema: OrganizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: siteConfig.name,
+  url: siteConfig.seo.siteUrl,
+};
+
+// Add logo if available
+if (siteConfig.logo) {
+  const logoUrl = siteConfig.logo.startsWith('http')
+    ? siteConfig.logo
+    : new URL(siteConfig.logo, siteConfig.seo.siteUrl).href;
+  schema.logo = logoUrl;
+}
+
+// Add contact point if phone is available
+if (siteConfig.phone) {
+  schema.contactPoint = {
+    '@type': 'ContactPoint',
+    telephone: siteConfig.phone,
+    contactType: 'customer service',
+  };
+}
+
+// Add address if available
+if (siteConfig.address) {
+  schema.address = {
+    '@type': 'PostalAddress',
+    streetAddress: siteConfig.address.street,
+    addressLocality: siteConfig.address.city,
+    addressRegion: siteConfig.address.state,
+    postalCode: siteConfig.address.zip,
+  };
+}
+
+// Add social profiles
+const socialUrls: string[] = [];
+if (siteConfig.social) {
+  const { facebook, instagram, twitter, linkedin, youtube, tiktok } = siteConfig.social;
+  if (facebook) socialUrls.push(facebook);
+  if (instagram) socialUrls.push(instagram);
+  if (twitter) socialUrls.push(twitter);
+  if (linkedin) socialUrls.push(linkedin);
+  if (youtube) socialUrls.push(youtube);
+  if (tiktok) socialUrls.push(tiktok);
+}
+if (socialUrls.length > 0) {
+  schema.sameAs = socialUrls;
+}
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

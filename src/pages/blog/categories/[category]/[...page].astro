@@ -1,0 +1,222 @@
+---
+/**
+ * Category Archive Page with Pagination
+ *
+ * Displays posts filtered by a specific category.
+ * Paginated at 9 posts per page, reverse chronological order.
+ *
+ * Routes:
+ * - /blog/categories/[category]/ - First page
+ * - /blog/categories/[category]/2/, etc. - Subsequent pages
+ */
+
+import { getCollection, getEntry } from 'astro:content';
+import type { GetStaticPathsOptions, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import SEO from '@/components/SEO.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import PostCard from '@/components/PostCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import pagesData from '@/data/pages.json';
+
+type BlogPost = CollectionEntry<'blog'>;
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  // Define constants and helpers inside getStaticPaths for Astro compilation
+  const POSTS_PER_PAGE = 9;
+
+  const slugifyCategory = (category: string): string => {
+    return category.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  const allPosts = await getCollection('blog');
+
+  // Filter drafts in production
+  const isProduction = import.meta.env.PROD;
+  const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+
+  // Collect all unique categories (normalized)
+  const categoryMap = new Map<string, { display: string; slug: string }>();
+
+  for (const post of visiblePosts) {
+    for (const category of post.data.categories) {
+      const slug = slugifyCategory(category);
+      if (!categoryMap.has(slug)) {
+        categoryMap.set(slug, { display: category, slug });
+      }
+    }
+  }
+
+  // Generate paginated paths for each category
+  const paths = [];
+
+  for (const [categorySlug, categoryData] of categoryMap) {
+    // Filter posts that have this category
+    const categoryPosts = visiblePosts.filter((post) =>
+      post.data.categories.some((c) => slugifyCategory(c) === categorySlug)
+    );
+
+    // Sort by publication date (newest first)
+    const sortedPosts = categoryPosts.sort(
+      (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+    );
+
+    // Generate paginated paths for this category
+    const paginatedPaths = paginate(sortedPosts, {
+      params: { category: categorySlug },
+      props: { categoryDisplay: categoryData.display, categorySlug },
+      pageSize: POSTS_PER_PAGE,
+    });
+
+    paths.push(...paginatedPaths);
+  }
+
+  return paths;
+}
+
+interface Props {
+  page: Page<BlogPost>;
+  categoryDisplay: string;
+  categorySlug: string;
+}
+
+const { page, categoryDisplay, categorySlug } = Astro.props;
+
+// Handle redirect from /blog/categories/[category]/1/ to /blog/categories/[category]/
+const params = Astro.params;
+const pageParam = params.page;
+
+if (pageParam === '1') {
+  return Astro.redirect(`/blog/categories/${categorySlug}/`, 301);
+}
+
+// Validate page number
+const currentPage = page.currentPage;
+const totalPages = page.lastPage;
+
+if (currentPage > totalPages && totalPages > 0) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not Found',
+  });
+}
+
+// Get page SEO data from templates
+const categoriesSeoData = pagesData.taxonomies.categories;
+const pageTitle = categoriesSeoData.titleTemplate.replace('%s', categoryDisplay);
+const pageDescription = categoriesSeoData.descriptionTemplate.replace('%s', categoryDisplay);
+
+// Fetch author data for each post
+const postsWithAuthors = await Promise.all(
+  page.data.map(async (post) => {
+    const author = await getEntry(post.data.author);
+    return {
+      post,
+      author: author
+        ? { name: author.data.name, slug: author.data.slug }
+        : { name: 'Unknown Author', slug: '' },
+    };
+  })
+);
+
+const isProduction = import.meta.env.PROD;
+---
+
+<PageLayout title={pageTitle}>
+  <SEO
+    slot="head"
+    title={currentPage > 1 ? `${pageTitle} - Page ${currentPage}` : pageTitle}
+    description={pageDescription}
+    canonicalUrl={currentPage === 1 ? `/blog/categories/${categorySlug}/` : undefined}
+  />
+
+  <Breadcrumbs currentPath={Astro.url.pathname} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <header class="text-center mb-12">
+      <div
+        class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full mb-4"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+        </svg>
+        <span class="font-medium">Category</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {categoryDisplay}
+      </h1>
+      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+        {page.total}
+        {page.total === 1 ? 'post' : 'posts'} in the "{categoryDisplay}" category
+      </p>
+    </header>
+
+    {/* Posts Grid */}
+    {
+      postsWithAuthors.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {postsWithAuthors.map(({ post, author }) => (
+            <PostCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              author={author}
+              tags={post.data.tags}
+              image={post.data.image}
+              isDraft={!isProduction && post.data.draft}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-neutral-600">No posts found in this category.</p>
+        </div>
+      )
+    }
+
+    {/* Pagination */}
+    {
+      totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          basePath={`/blog/categories/${categorySlug}`}
+        />
+      )
+    }
+
+    {/* Back to Categories Link */}
+    <div class="text-center mt-12">
+      <a
+        href="/blog/categories/"
+        class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        View all categories
+      </a>
+    </div>
+  </div>
+</PageLayout>

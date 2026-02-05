@@ -1,0 +1,35 @@
+---
+/**
+ * WebSite JSON-LD Schema Component
+ *
+ * Outputs structured data for WebSite schema.
+ * Uses site config for site name and URL.
+ *
+ * @see https://schema.org/WebSite
+ *
+ * @example
+ * ```astro
+ * <WebSiteLD />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+interface WebSiteSchema {
+  '@context': 'https://schema.org';
+  '@type': 'WebSite';
+  name: string;
+  url: string;
+}
+
+const schema: WebSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteConfig.name,
+  url: siteConfig.seo.siteUrl,
+};
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

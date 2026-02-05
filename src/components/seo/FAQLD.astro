@@ -1,0 +1,72 @@
+---
+/**
+ * FAQPage JSON-LD Schema Component
+ *
+ * Outputs structured data for FAQPage schema.
+ * Used on pages with frequently asked questions.
+ *
+ * @see https://schema.org/FAQPage
+ *
+ * @example
+ * ```astro
+ * <FAQLD
+ *   items={[
+ *     {
+ *       question: "What services do you offer?",
+ *       answer: "We offer consulting, implementation, and support services."
+ *     },
+ *     {
+ *       question: "How can I contact you?",
+ *       answer: "You can reach us by phone at (555) 123-4567 or through our contact form."
+ *     }
+ *   ]}
+ * />
+ * ```
+ */
+
+export interface FAQItem {
+  /** The question text */
+  question: string;
+  /** The answer text (can include HTML for rich answers) */
+  answer: string;
+}
+
+export interface Props {
+  /** Array of FAQ items */
+  items: FAQItem[];
+}
+
+const { items } = Astro.props;
+
+interface QuestionSchema {
+  '@type': 'Question';
+  name: string;
+  acceptedAnswer: {
+    '@type': 'Answer';
+    text: string;
+  };
+}
+
+interface FAQPageSchema {
+  '@context': 'https://schema.org';
+  '@type': 'FAQPage';
+  mainEntity: QuestionSchema[];
+}
+
+const schema: FAQPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

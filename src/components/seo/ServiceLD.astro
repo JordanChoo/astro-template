@@ -1,0 +1,60 @@
+---
+/**
+ * Service JSON-LD Schema Component
+ *
+ * Outputs structured data for Service or ProfessionalService schema.
+ * Provider information is pulled from site config.
+ *
+ * @see https://schema.org/Service
+ * @see https://schema.org/ProfessionalService
+ *
+ * @example
+ * ```astro
+ * <ServiceLD
+ *   name="Business Consulting"
+ *   description="Expert business consulting services for companies of all sizes."
+ * />
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface Props {
+  /** Service name */
+  name: string;
+  /** Service description */
+  description: string;
+  /** Use ProfessionalService type instead of Service (optional, default: false) */
+  isProfessionalService?: boolean;
+}
+
+const { name, description, isProfessionalService = false } = Astro.props;
+
+interface ServiceSchema {
+  '@context': 'https://schema.org';
+  '@type': 'Service' | 'ProfessionalService';
+  name: string;
+  description: string;
+  provider: {
+    '@type': 'Organization';
+    name: string;
+    url: string;
+  };
+}
+
+const schema: ServiceSchema = {
+  '@context': 'https://schema.org',
+  '@type': isProfessionalService ? 'ProfessionalService' : 'Service',
+  name,
+  description,
+  provider: {
+    '@type': 'Organization',
+    name: siteConfig.name,
+    url: siteConfig.seo.siteUrl,
+  },
+};
+
+const jsonLd = JSON.stringify(schema);
+---
+
+<script type="application/ld+json" set:html={jsonLd} />

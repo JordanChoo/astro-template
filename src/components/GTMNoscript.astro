@@ -1,0 +1,45 @@
+---
+/**
+ * Google Tag Manager Noscript Component
+ *
+ * This component renders the GTM noscript iframe for tracking
+ * when JavaScript is disabled. Place immediately after opening <body> tag.
+ *
+ * @example
+ * ```astro
+ * ---
+ * import GTMNoscript from '@/components/GTMNoscript.astro';
+ * ---
+ * <body>
+ *   <GTMNoscript />
+ *   <!-- rest of content -->
+ * </body>
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface Props {
+  /** GTM Container ID (defaults to config.gtmId) */
+  gtmId?: string;
+}
+
+const { gtmId = siteConfig.gtmId } = Astro.props;
+
+// Only render if GTM ID is provided and not a placeholder
+const shouldRender = gtmId && !gtmId.includes('XXXXXX');
+---
+
+{/* GTM Noscript - render only if ID is valid */}
+{
+  shouldRender && (
+    <noscript>
+      <iframe
+        src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+      />
+    </noscript>
+  )
+}

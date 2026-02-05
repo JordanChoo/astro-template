@@ -1,0 +1,120 @@
+---
+/**
+ * Tags Index Page
+ *
+ * Lists all tags with their post counts.
+ * Tags are lowercased and slugified (spaces to hyphens).
+ * Excludes tags with 0 visible posts.
+ */
+
+import { getCollection } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import SEO from '@/components/SEO.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+
+// Get all blog posts
+const allPosts = await getCollection('blog');
+
+// Filter drafts in production
+const isProduction = import.meta.env.PROD;
+const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+
+/**
+ * Normalize a tag to URL-friendly format
+ */
+function slugifyTag(tag: string): string {
+  return tag.toLowerCase().replace(/\s+/g, '-');
+}
+
+/**
+ * Build tag counts from visible posts
+ */
+function getTagCounts(): Map<string, { display: string; slug: string; count: number }> {
+  const tagMap = new Map<string, { display: string; slug: string; count: number }>();
+
+  for (const post of visiblePosts) {
+    for (const tag of post.data.tags) {
+      const slug = slugifyTag(tag);
+
+      if (tagMap.has(slug)) {
+        const existing = tagMap.get(slug)!;
+        existing.count += 1;
+      } else {
+        tagMap.set(slug, {
+          display: tag,
+          slug,
+          count: 1,
+        });
+      }
+    }
+  }
+
+  return tagMap;
+}
+
+const tagCounts = getTagCounts();
+
+// Convert to sorted array (alphabetically by display name)
+const sortedTags = Array.from(tagCounts.values())
+  .filter((tag) => tag.count > 0)
+  .sort((a, b) => a.display.localeCompare(b.display));
+---
+
+<PageLayout title="Tags">
+  <SEO
+    slot="head"
+    title="Tags"
+    description="Browse all blog post tags. Find articles on specific topics."
+  />
+
+  <Breadcrumbs currentPath={Astro.url.pathname} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <header class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">Tags</h1>
+      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+        Browse all blog post tags to find articles on specific topics.
+      </p>
+    </header>
+
+    {/* Tags Grid */}
+    {
+      sortedTags.length > 0 ? (
+        <div class="flex flex-wrap justify-center gap-4">
+          {sortedTags.map((tag) => (
+            <a
+              href={`/blog/tags/${tag.slug}/`}
+              class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-lg text-neutral-700 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 transition-colors shadow-sm"
+            >
+              <span class="font-medium">{tag.display}</span>
+              <span class="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 text-xs font-semibold bg-neutral-100 text-neutral-600 rounded-full">
+                {tag.count}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <svg
+            class="w-16 h-16 mx-auto text-neutral-300 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+            />
+          </svg>
+          <h2 class="text-xl font-semibold text-neutral-900 mb-2">No tags yet</h2>
+          <p class="text-neutral-600">Tags will appear here once posts are published.</p>
+        </div>
+      )
+    }
+  </div>
+</PageLayout>

@@ -1,0 +1,7 @@
+# robots.txt for Astro Starter Theme
+# Update the Sitemap URL to match your production domain
+
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap-index.xml

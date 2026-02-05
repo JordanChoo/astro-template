@@ -1,0 +1,47 @@
+---
+/**
+ * Google Tag Manager Components
+ *
+ * This file exports two components:
+ * 1. GTM (default) - Goes in the <head> section
+ * 2. GTMNoscript - Goes immediately after opening <body> tag
+ *
+ * Both components conditionally render only when a GTM ID is provided.
+ *
+ * @example
+ * ```astro
+ * ---
+ * import GTM, { GTMNoscript } from '@/components/GTM.astro';
+ * ---
+ * <html>
+ *   <head>
+ *     <GTM />
+ *   </head>
+ *   <body>
+ *     <GTMNoscript />
+ *     <!-- rest of content -->
+ *   </body>
+ * </html>
+ * ```
+ */
+
+import siteConfig from '@/config/site';
+
+export interface Props {
+  /** GTM Container ID (defaults to config.gtmId) */
+  gtmId?: string;
+}
+
+const { gtmId = siteConfig.gtmId } = Astro.props;
+
+// Only render if GTM ID is provided and not a placeholder
+const shouldRender = gtmId && !gtmId.includes('XXXXXX');
+
+// GTM script content (minified inline)
+const gtmScript = shouldRender
+  ? `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`
+  : null;
+---
+
+{/* GTM Head Script - render only if ID is valid */}
+{shouldRender && gtmScript && <script set:html={gtmScript} />}

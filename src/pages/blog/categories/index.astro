@@ -1,0 +1,138 @@
+---
+/**
+ * Categories Index Page
+ *
+ * Lists all categories with their post counts.
+ * Categories are lowercased and slugified (spaces to hyphens).
+ * Excludes categories with 0 visible posts.
+ */
+
+import { getCollection } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import SEO from '@/components/SEO.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+
+// Get all blog posts
+const allPosts = await getCollection('blog');
+
+// Filter drafts in production
+const isProduction = import.meta.env.PROD;
+const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+
+/**
+ * Normalize a category to URL-friendly format
+ */
+function slugifyCategory(category: string): string {
+  return category.toLowerCase().replace(/\s+/g, '-');
+}
+
+/**
+ * Build category counts from visible posts
+ */
+function getCategoryCounts(): Map<string, { display: string; slug: string; count: number }> {
+  const categoryMap = new Map<string, { display: string; slug: string; count: number }>();
+
+  for (const post of visiblePosts) {
+    for (const category of post.data.categories) {
+      const slug = slugifyCategory(category);
+
+      if (categoryMap.has(slug)) {
+        const existing = categoryMap.get(slug)!;
+        existing.count += 1;
+      } else {
+        categoryMap.set(slug, {
+          display: category,
+          slug,
+          count: 1,
+        });
+      }
+    }
+  }
+
+  return categoryMap;
+}
+
+const categoryCounts = getCategoryCounts();
+
+// Convert to sorted array (alphabetically by display name)
+const sortedCategories = Array.from(categoryCounts.values())
+  .filter((category) => category.count > 0)
+  .sort((a, b) => a.display.localeCompare(b.display));
+---
+
+<PageLayout title="Categories">
+  <SEO
+    slot="head"
+    title="Categories"
+    description="Browse all blog categories. Find articles organized by topic."
+  />
+
+  <Breadcrumbs currentPath={Astro.url.pathname} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <header class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">Categories</h1>
+      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+        Browse all blog categories to find articles organized by topic.
+      </p>
+    </header>
+
+    {/* Categories Grid */}
+    {
+      sortedCategories.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedCategories.map((category) => (
+            <a
+              href={`/blog/categories/${category.slug}/`}
+              class="group flex items-center justify-between p-4 bg-white border border-neutral-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors shadow-sm"
+            >
+              <div class="flex items-center gap-3">
+                <svg
+                  class="w-5 h-5 text-neutral-400 group-hover:text-primary-600 transition-colors"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                  />
+                </svg>
+                <span class="font-medium text-neutral-900 group-hover:text-primary-700">
+                  {category.display}
+                </span>
+              </div>
+              <span class="inline-flex items-center justify-center min-w-[2rem] h-7 px-2 text-sm font-semibold bg-neutral-100 text-neutral-600 rounded-full group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">
+                {category.count}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <svg
+            class="w-16 h-16 mx-auto text-neutral-300 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+            />
+          </svg>
+          <h2 class="text-xl font-semibold text-neutral-900 mb-2">No categories yet</h2>
+          <p class="text-neutral-600">Categories will appear here once posts are published.</p>
+        </div>
+      )
+    }
+  </div>
+</PageLayout>

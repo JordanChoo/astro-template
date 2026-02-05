@@ -1,0 +1,57 @@
+---
+/**
+ * Home Page
+ *
+ * The main landing page for the site.
+ * Data-driven using homepage.json with Zod validation.
+ */
+
+import PageLayout from '../layouts/PageLayout.astro';
+import OrganizationLD from '../components/seo/OrganizationLD.astro';
+import WebSiteLD from '../components/seo/WebSiteLD.astro';
+
+// Section components
+import Hero from '../components/sections/Hero.astro';
+import Features from '../components/sections/Features.astro';
+import Stats from '../components/sections/Stats.astro';
+import Testimonials from '../components/sections/Testimonials.astro';
+import CTA from '../components/sections/CTA.astro';
+import FAQ from '../components/sections/FAQ.astro';
+import ContactInfo from '../components/sections/ContactInfo.astro';
+
+// Homepage data (validated via Zod at import time)
+import homepage from '../data/homepage.schema';
+---
+
+<PageLayout title="Home">
+  {/* JSON-LD structured data for organization and website */}
+  <Fragment slot="head">
+    <OrganizationLD />
+    <WebSiteLD />
+  </Fragment>
+
+  {/* Hero Section */}
+  <Hero
+    headline={homepage.hero.headline}
+    subheadline={homepage.hero.subheadline}
+    cta={homepage.hero.cta}
+  />
+
+  {/* Features Section - only show if features exist */}
+  {homepage.features.length > 0 && <Features features={homepage.features} />}
+
+  {/* Stats Section - only show if stats exist */}
+  {homepage.stats.length > 0 && <Stats stats={homepage.stats} />}
+
+  {/* Testimonials Section - only show if testimonials exist */}
+  {homepage.testimonials.length > 0 && <Testimonials testimonials={homepage.testimonials} />}
+
+  {/* CTA Section */}
+  <CTA headline={homepage.cta.headline} button={homepage.cta.button} />
+
+  {/* FAQ Section - only show if FAQ items exist */}
+  {homepage.faq.length > 0 && <FAQ items={homepage.faq} />}
+
+  {/* Contact Info Section - only show if enabled in config */}
+  {homepage.showContact && <ContactInfo />}
+</PageLayout>

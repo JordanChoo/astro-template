@@ -1,0 +1,106 @@
+{
+  "hero": {
+    "headline": "Professional Solutions for Modern Business Challenges",
+    "subheadline": "We help businesses streamline operations, boost productivity, and achieve sustainable growth through expert consulting and proven methodologies.",
+    "cta": {
+      "text": "Get Started Today",
+      "link": "/contact"
+    }
+  },
+  "features": [
+    {
+      "icon": "shield",
+      "title": "Trusted Quality",
+      "description": "We are committed to delivering excellence in everything we do, backed by years of experience and a proven track record of success."
+    },
+    {
+      "icon": "users",
+      "title": "Expert Team",
+      "description": "Our professionals bring deep expertise and unwavering dedication to every project, ensuring you receive the best possible guidance."
+    },
+    {
+      "icon": "clock",
+      "title": "Always Available",
+      "description": "We are here when you need us, with responsive support and clear communication throughout your entire journey with us."
+    },
+    {
+      "icon": "chart",
+      "title": "Data-Driven Results",
+      "description": "Our approach is rooted in analytics and measurable outcomes, helping you make informed decisions that drive real business growth."
+    },
+    {
+      "icon": "lightning",
+      "title": "Fast Implementation",
+      "description": "We move quickly without sacrificing quality, getting your solutions up and running so you can start seeing results sooner."
+    },
+    {
+      "icon": "cog",
+      "title": "Custom Solutions",
+      "description": "Every business is unique. We tailor our services to fit your specific needs, goals, and operational requirements."
+    }
+  ],
+  "stats": [
+    {
+      "value": "500+",
+      "label": "Projects Completed"
+    },
+    {
+      "value": "99%",
+      "label": "Client Satisfaction"
+    },
+    {
+      "value": "15+",
+      "label": "Years Experience"
+    },
+    {
+      "value": "50+",
+      "label": "Team Members"
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Working with Acme Services transformed our business operations. Their team understood our challenges and delivered solutions that exceeded our expectations.",
+      "name": "Sarah Mitchell",
+      "attribution": "CEO, TechStart Inc."
+    },
+    {
+      "quote": "The level of professionalism and expertise is unmatched. They do not just solve problems, they anticipate them and help you stay ahead of the curve.",
+      "name": "James Rodriguez",
+      "attribution": "Operations Director, Global Logistics Co."
+    },
+    {
+      "quote": "From day one, the team was responsive, knowledgeable, and genuinely invested in our success. I cannot recommend them highly enough.",
+      "name": "Emily Chen"
+    }
+  ],
+  "cta": {
+    "headline": "Ready to Transform Your Business?",
+    "button": {
+      "text": "Schedule a Consultation",
+      "link": "/contact"
+    }
+  },
+  "faq": [
+    {
+      "question": "What services do you offer?",
+      "answer": "We offer comprehensive business consulting services including strategic planning, operational optimization, digital transformation, and ongoing support. Our team works closely with you to identify challenges and implement solutions tailored to your specific needs."
+    },
+    {
+      "question": "How long does a typical project take?",
+      "answer": "Project timelines vary based on scope and complexity. Initial assessments typically take 2-4 weeks, while full implementations can range from 1-6 months. We will provide a detailed timeline during our initial consultation based on your specific requirements."
+    },
+    {
+      "question": "Do you work with businesses of all sizes?",
+      "answer": "Yes, we work with organizations of all sizes, from startups to enterprise-level corporations. Our solutions are scalable and can be customized to fit your budget and operational needs."
+    },
+    {
+      "question": "What industries do you specialize in?",
+      "answer": "While we have deep expertise in technology, healthcare, and professional services, our methodologies and frameworks are industry-agnostic. We have successfully delivered projects across manufacturing, retail, finance, and many other sectors."
+    },
+    {
+      "question": "How do I get started?",
+      "answer": "Getting started is easy. Simply contact us through our website or give us a call. We will schedule an initial consultation to understand your needs, discuss potential solutions, and outline next steps. There is no obligation and the consultation is free."
+    }
+  ],
+  "showContact": true
+}

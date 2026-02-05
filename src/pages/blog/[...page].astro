@@ -1,0 +1,163 @@
+---
+/**
+ * Blog Listing Page with Pagination
+ *
+ * Displays paginated list of blog posts (9 posts per page).
+ * Excludes draft posts in production mode.
+ * Redirects /blog/1/ to /blog/ for canonical URL.
+ *
+ * Routes:
+ * - /blog/ - First page of blog posts
+ * - /blog/2/, /blog/3/, etc. - Subsequent pages
+ */
+
+import { getCollection, getEntry } from 'astro:content';
+import type { GetStaticPathsOptions, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import SEO from '@/components/SEO.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import PostCard from '@/components/PostCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import pagesData from '@/data/pages.json';
+
+type BlogPost = CollectionEntry<'blog'>;
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  // Define constants inside getStaticPaths for Astro compilation
+  const POSTS_PER_PAGE = 9;
+
+  // Get all blog posts
+  const allPosts = await getCollection('blog');
+
+  // Filter drafts in production
+  const isProduction = import.meta.env.PROD;
+  const filteredPosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+
+  // Sort by publication date (newest first)
+  const sortedPosts = filteredPosts.sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+  );
+
+  // Generate paginated paths
+  return paginate(sortedPosts, {
+    pageSize: POSTS_PER_PAGE,
+  });
+}
+
+interface Props {
+  page: Page<BlogPost>;
+}
+
+const { page } = Astro.props;
+
+// Handle redirect from /blog/1/ to /blog/
+// The page parameter will be undefined for /blog/ and "1" for /blog/1/
+const params = Astro.params;
+const pageParam = params.page;
+
+// If page param is "1", return 404 to prevent duplicate content
+// Users should be redirected to /blog/ instead
+if (pageParam === '1') {
+  return Astro.redirect('/blog/', 301);
+}
+
+// Validate page number - return 404 for invalid page numbers
+const currentPage = page.currentPage;
+const totalPages = page.lastPage;
+
+if (currentPage > totalPages && totalPages > 0) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not Found',
+  });
+}
+
+// Get page SEO data
+const blogSeoData = pagesData.listings.blog;
+
+// Fetch author data for each post
+const postsWithAuthors = await Promise.all(
+  page.data.map(async (post) => {
+    const author = await getEntry(post.data.author);
+    return {
+      post,
+      author: author
+        ? { name: author.data.name, slug: author.data.slug }
+        : { name: 'Unknown Author', slug: '' },
+    };
+  })
+);
+
+const isProduction = import.meta.env.PROD;
+---
+
+<PageLayout title={blogSeoData.title}>
+  <SEO
+    slot="head"
+    title={currentPage > 1 ? `${blogSeoData.title} - Page ${currentPage}` : blogSeoData.title}
+    description={blogSeoData.description}
+    canonicalUrl={currentPage === 1 ? '/blog/' : undefined}
+  />
+
+  <Breadcrumbs currentPath={Astro.url.pathname} />
+
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Page Header */}
+    <header class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+        {blogSeoData.title}
+      </h1>
+      <p class="text-lg text-neutral-600 max-w-2xl mx-auto">
+        {blogSeoData.description}
+      </p>
+    </header>
+
+    {/* Posts Grid */}
+    {
+      postsWithAuthors.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {postsWithAuthors.map(({ post, author }) => (
+            <PostCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              author={author}
+              tags={post.data.tags}
+              image={post.data.image}
+              isDraft={!isProduction && post.data.draft}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <svg
+            class="w-16 h-16 mx-auto text-neutral-300 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+            />
+          </svg>
+          <h2 class="text-xl font-semibold text-neutral-900 mb-2">No posts yet</h2>
+          <p class="text-neutral-600">Check back soon for new content!</p>
+        </div>
+      )
+    }
+
+    {/* Pagination */}
+    {
+      totalPages > 1 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/blog" />
+      )
+    }
+  </div>
+</PageLayout>

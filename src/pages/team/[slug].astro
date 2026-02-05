@@ -1,0 +1,237 @@
+---
+/**
+ * Team Member Detail Page
+ *
+ * Dynamic page for individual team member profiles.
+ * Includes profile info (name, avatar, bio, role), social links,
+ * and a list of their published blog posts.
+ *
+ * - Social links are displayed only if configured
+ * - Posts section is hidden if member has 0 published posts
+ * - Drafts are excluded in production
+ */
+
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+import PageLayout from '@/layouts/PageLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import SEO from '@/components/SEO.astro';
+import BreadcrumbLD from '@/components/seo/BreadcrumbLD.astro';
+import PostCard from '@/components/PostCard.astro';
+
+type TeamMember = CollectionEntry<'team'>;
+
+export async function getStaticPaths() {
+  const allTeamMembers = await getCollection('team');
+
+  // Check for duplicate slugs - this will cause build to fail if duplicates exist
+  const slugs = allTeamMembers.map((member) => member.data.slug);
+  const duplicates = slugs.filter((slug, index) => slugs.indexOf(slug) !== index);
+
+  if (duplicates.length > 0) {
+    throw new Error(
+      `Duplicate team member slugs found: ${[...new Set(duplicates)].join(', ')}. ` +
+        `Each team member must have a unique slug.`
+    );
+  }
+
+  return allTeamMembers.map((member) => ({
+    params: { slug: member.data.slug },
+    props: { member },
+  }));
+}
+
+interface Props {
+  member: TeamMember;
+}
+
+const { member } = Astro.props;
+const currentPath = Astro.url.pathname;
+const isProduction = import.meta.env.PROD;
+
+// Render the member's bio content (markdown body)
+const { Content } = await render(member);
+
+// Get all blog posts by this team member
+const allBlogPosts = await getCollection('blog');
+const memberPosts = allBlogPosts
+  .filter((post) => {
+    // Filter by author reference
+    const authorId = post.data.author.id;
+    const isAuthor = authorId === member.id;
+
+    // In production, exclude drafts
+    if (isProduction && post.data.draft) {
+      return false;
+    }
+
+    return isAuthor;
+  })
+  // Sort by date, newest first
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Team', url: '/team/' },
+  { name: member.data.name, url: `/team/${member.data.slug}/` },
+];
+
+// Social link configurations
+const socialLinks = [
+  {
+    key: 'twitter' as const,
+    label: 'Twitter',
+    icon: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>`,
+  },
+  {
+    key: 'linkedin' as const,
+    label: 'LinkedIn',
+    icon: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>`,
+  },
+  {
+    key: 'github' as const,
+    label: 'GitHub',
+    icon: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+    </svg>`,
+  },
+];
+
+// Filter to only social links that are configured
+const configuredSocialLinks = socialLinks.filter((link) => member.data.social?.[link.key]);
+---
+
+<PageLayout title={member.data.name}>
+  <Fragment slot="head">
+    <SEO title={member.data.name} description={member.data.bio} image={member.data.avatar} />
+    <BreadcrumbLD items={breadcrumbItems} />
+  </Fragment>
+
+  <Breadcrumbs currentPath={currentPath} />
+
+  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    {/* Profile Header */}
+    <header class="mb-12">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
+        {/* Avatar */}
+        <div class="flex-shrink-0">
+          {
+            member.data.avatar ? (
+              <img
+                src={member.data.avatar}
+                alt={member.data.name}
+                class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-neutral-100 shadow-md"
+              />
+            ) : (
+              <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-neutral-100 flex items-center justify-center border-4 border-neutral-100 shadow-md">
+                <svg
+                  class="w-16 h-16 text-neutral-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                  />
+                </svg>
+              </div>
+            )
+          }
+        </div>
+
+        {/* Name, Role, and Social Links */}
+        <div class="text-center sm:text-left flex-1">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-2">
+            {member.data.name}
+          </h1>
+
+          <p class="text-lg sm:text-xl text-primary-600 font-medium mb-4">
+            {member.data.role}
+          </p>
+
+          {/* Social Links */}
+          {
+            configuredSocialLinks.length > 0 && (
+              <div class="flex items-center justify-center sm:justify-start gap-3">
+                {configuredSocialLinks.map((social) => (
+                  <a
+                    href={member.data.social![social.key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-neutral-100 text-neutral-600 hover:bg-primary-100 hover:text-primary-600 transition-colors"
+                    aria-label={`${member.data.name} on ${social.label}`}
+                  >
+                    <Fragment set:html={social.icon} />
+                  </a>
+                ))}
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </header>
+
+    {/* Bio Section */}
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-neutral-900 mb-4">About</h2>
+      <div class="prose prose-neutral prose-lg max-w-none">
+        <Content />
+      </div>
+    </section>
+
+    {/* Blog Posts Section - Only show if member has posts */}
+    {
+      memberPosts.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-neutral-900 mb-6">Articles by {member.data.name}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {memberPosts.map((post) => (
+              <PostCard
+                slug={post.id}
+                title={post.data.title}
+                description={post.data.description}
+                pubDate={post.data.pubDate}
+                author={{ name: member.data.name, slug: member.data.slug }}
+                tags={post.data.tags}
+                image={post.data.image}
+                isDraft={!isProduction && post.data.draft}
+              />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {/* Back to Team Link */}
+    <div class="mt-12 pt-8 border-t border-neutral-200">
+      <a
+        href="/team/"
+        class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
+      >
+        <svg
+          class="mr-2 w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+        </svg>
+        Back to team
+      </a>
+    </div>
+  </article>
+</PageLayout>
