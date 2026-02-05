@@ -1,0 +1,46 @@
+## Why
+
+Every new client project starts with the same setup work: scaffolding an Astro site, configuring Tailwind, building out SEO infrastructure, creating content collection schemas, and wiring up a marketing page layout. This repeated effort delays actual project-specific work and introduces inconsistency across projects. A reusable starter theme eliminates this bootstrap cost and establishes a consistent, SEO-optimized foundation for marketing sites with blog, service, and location pages.
+
+## What Changes
+
+- Create a complete Astro 5.x starter theme optimized for marketing/landing page sites
+- Establish a centralized site configuration system (`src/config/site.ts`) for business details, SEO defaults, social links, Twitter handle, and GTM — with build-time validation that fails on invalid/missing required values
+- Build a full marketing homepage with hero, features grid, stats/trust signals, testimonials, CTA, FAQ accordion (with FAQPage JSON-LD), and contact info sections — all content sourced from `src/data/homepage.json`, passed to section components via props for reusability, sections hidden when data is empty
+- Implement a full blog system using Astro content collections with MDX, tags (forced lowercase, slugified URLs), categories (forced lowercase), pagination (9 per page, including tag and category pages), RSS feed (last 25 posts), reading time (238 wpm, rounded up), related posts (deterministic pseudo-random fallback seeded by post slug), Shiki syntax highlighting, and draft exclusion from all public-facing surfaces in production
+- Create team member profiles using a dedicated content collection — listing at `/team/`, detail pages at `/team/[slug]` with authored posts, serving as both blog authors and team directory
+- Create data-driven service pages using Astro content collections (`type: 'data'`) with Zod schema validation, explicit sort ordering (tiebreaker: alphabetical by title), plain text long descriptions, full SEO (JSON-LD + meta + OG)
+- Create data-driven location pages using Astro content collections (`type: 'data'`) for programmatic SEO — with optional coordinates (JSON-LD only, no map), optional operating hours (Schema.org-aligned: split hours, day grouping, 24h format), plain text long descriptions, sorted alphabetically by city then state, and cross-references to services
+- Build a full SEO component suite: meta tags (with 160-char description warnings, optional noindex), Open Graph (with image dimensions and fallback chain), Twitter cards (with site/creator handles), JSON-LD structured data as separate script tags (Organization, WebSite, BlogPosting, Service, LocalBusiness, BreadcrumbList, FAQPage), self-referencing paginated canonicals, sitemap.xml (excluding paginated and noindex pages), robots.txt, favicons, and GTM injection (script + noscript, advisory: no consent mechanism included)
+- Build responsive layouts with sticky header, full-screen overlay mobile nav (with focus trapping, Escape-to-close, scroll lock, and ARIA attributes for WCAG 2.1 AA), skip-to-content link, active nav states (prefix matching, exact match for Home), breadcrumbs for all page types (excluding 404), dedicated `/contact` page (no form, with optional default operating hours from site config), custom 404 page, Google Fonts with `font-display: swap`, and build-time copyright year
+- Deploy via GitHub Actions to Cloudflare Pages (static SSG output)
+- Set up full DX tooling: pnpm, Node.js version pinning (.nvmrc pinned to 22 + engines >=18.17.1), TypeScript strict + `astro check`, ESLint + `eslint-config-prettier`, Prettier, Husky + lint-staged pre-commit hooks, Tailwind CSS v4 with Vite plugin and CSS-based `@theme` design tokens, Vitest testing framework, GitHub Actions CI/CD (lint, check, build, test on PRs; deploy on merge), Lighthouse 90+ targets, VS Code settings, recommended extensions, .editorconfig
+- Enforce cross-cutting Astro `<Image>` optimization for all content images and WCAG 2.1 AA compliance
+- Provide full demo/placeholder content for all content types
+
+## Capabilities
+
+### New Capabilities
+
+- `site-config`: Centralized site configuration system — business details, optional address, optional phone, contact info, social links, Twitter handle, SEO defaults (with OG image dimensions), GTM ID, optional default operating hours (Schema.org-aligned). Build-time validation fails on invalid values. All components pull from this single source. Advisory: GTM injection does not include consent management — GDPR/CCPA compliance is a per-project responsibility.
+- `marketing-homepage`: Full marketing landing page with reusable section components — hero (full-width, min 60vh), features grid (inline SVG icons via lookup object with build-time validation), stats/trust signals, testimonials, CTA, FAQ accordion (keyboard accessible, with FAQPage JSON-LD), contact info display. All content from `src/data/homepage.json`, passed to section components via props for reusability. Empty sections auto-hide. Default order specified.
+- `blog-system`: Complete blog using Astro content collections with MDX — post schema (config at `src/content.config.ts`), forced lowercase tags/categories with slugified URLs, 9-per-page pagination (including tag and category filtered views), RSS feed (last 25), reading time (238 wpm, rounded up), related posts (deterministic pseudo-random fallback seeded by post slug), Shiki syntax highlighting, Astro `<Image>` optimization. Drafts visible in dev with badge, excluded from all public-facing surfaces in production (counts, lists, cross-references, RSS, sitemap). Build fails on invalid author references.
+- `team-pages`: Team member profiles using dedicated content collection at `src/content/team/` — `/team/` listing and `/team/[slug]` detail pages. Schema: name, bio, avatar, role, social links (including Twitter handle for `twitter:creator`). Detail pages show authored blog posts. Serves as both blog author profiles and standalone team directory.
+- `service-pages`: Data-driven service pages using content collection (`type: 'data'`) at `src/content/services/` — Zod-validated schema, explicit `order` field (tiebreaker: alphabetical by title), plain text long descriptions, inline SVG icons (build fails on missing icon key, placeholder icon available), full SEO (Service JSON-LD + meta + OG). Dynamic routing at `/services/[slug]`.
+- `location-pages`: Data-driven location pages using content collection (`type: 'data'`) at `src/content/locations/` for programmatic SEO — Zod-validated schema, optional coordinates (JSON-LD only), optional operating hours (Schema.org-aligned: 24h HH:MM format, split hours, day grouping), optional phone (falls back to site config, omitted when neither exists), plain text long descriptions, sorted alphabetically by city then state, thin content risk documented. Cross-references to services (one-way: locations link to services). Dynamic routing at `/locations/[slug]`.
+- `seo-infrastructure`: SEO component suite — meta tags (160-char warnings, optional noindex), Open Graph (with dimensions, fallback chain: page → config → omit), Twitter cards (site + creator handles), JSON-LD as separate script tags per component (Organization, WebSite, BlogPosting, Service, LocalBusiness, BreadcrumbList, FAQPage), self-referencing paginated canonicals, sitemap.xml (excluding paginated and noindex pages), robots.txt (allow all + sitemap), favicons (svg, ico, apple-touch-icon), GTM injection (script + noscript).
+- `layouts-and-navigation`: BaseLayout (Google Fonts, font-display: swap, preconnect), PageLayout, PostLayout — sticky header, skip-to-content link, active nav states (prefix matching, exact match for Home), full-screen overlay mobile nav (focus trapping, Escape-to-close, scroll lock, aria-expanded, aria-label), footer with build-time copyright year, breadcrumbs for all page types (including About, excluding 404), dedicated `/contact` page (info only, no form, optional default operating hours from config), custom 404 page. WCAG 2.1 AA cross-cutting requirement.
+- `dev-tooling`: pnpm, Node.js version (.nvmrc pinned to 22, engines >=18.17.1), TypeScript strict + `astro check`, ESLint + `eslint-config-prettier`, Prettier, Husky + lint-staged, Tailwind CSS v4 with Vite plugin and CSS-based `@theme` design tokens (colors, fonts, spacing), Vitest (unit + component + smoke tests), GitHub Actions CI/CD (checks on PRs, deploy to Cloudflare Pages on merge), VS Code settings + recommended extensions, .editorconfig. Lighthouse 90+ targets. Cross-cutting Astro `<Image>` optimization for all content images. Local placeholder images for demo content.
+
+### Modified Capabilities
+
+_(none — greenfield project)_
+
+## Impact
+
+- **New dependencies**: Astro 5.x, Tailwind CSS v4, `@astrojs/mdx`, `@astrojs/sitemap`, `@astrojs/rss`, Shiki (built-in), Vitest, Husky, lint-staged, `eslint-config-prettier`, pnpm
+- **Project structure**: Full Astro project structure created from scratch — `src/`, `public/`, config files, `.github/workflows/`, `.husky/`
+- **Build output**: Static HTML/CSS/JS deployed to Cloudflare Pages via GitHub Actions
+- **Performance**: Lighthouse 90+ in all categories (Performance, Accessibility, Best Practices, SEO)
+- **Accessibility**: WCAG 2.1 Level AA compliance
+- **No breaking changes**: Greenfield — no existing code affected
