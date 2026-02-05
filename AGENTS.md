@@ -111,6 +111,144 @@ rm -rf openspec/changes/<name>        # Clean up planning artifacts (git history
 bd close <id> --reason "Completed"    # Close the issue
 ```
 
+## Git Branch Strategy
+
+This project uses **feature branches** for non-trivial changes. Planning happens on `main` for visibility; implementation happens on feature branches.
+
+### Branch Naming Convention
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Feature | `feature/<name>` | `feature/astro-starter-theme` |
+| Bug fix | `fix/<name>` | `fix/mobile-nav-focus-trap` |
+| Chore | `chore/<name>` | `chore/update-dependencies` |
+
+### OpenSpec + Feature Branches
+
+Planning artifacts are created on `main` so the team has visibility before implementation starts. Artifacts are deleted after the feature branch is merged.
+
+```
+main:     [plan] ─────────────────────────────── [merge] → [delete artifacts]
+                  \                             /
+feature:           └── [implement] ── [PR] ────┘
+```
+
+**Why plan on `main`?**
+- Planning is visible to everyone before work starts
+- Artifacts serve as documentation during review
+- Git history preserves artifacts after deletion
+
+### Beads + Feature Branches
+
+Beads stores issues in `.beads/issues.jsonl` with a custom merge driver (see `.gitattributes`) designed to handle concurrent modifications across branches.
+
+**Key points:**
+- Create shared issues (epics, tasks) on `main` before branching
+- Update issue status on your feature branch as you work
+- `bd sync` commits to the current branch (no `sync-branch` configured)
+- The merge driver handles conflicts when branches merge
+
+### Complete Feature Branch Workflow
+
+```bash
+# ═══════════════════════════════════════════════════════════════════
+# PHASE 1: Plan on main (shared visibility)
+# ═══════════════════════════════════════════════════════════════════
+git checkout main
+git pull
+
+# Create planning artifacts
+/opsx:ff <change-name>
+
+# Create tracking issue
+bd create "<change-name>" -t epic -p 1 -l "openspec:<change-name>" -d "## Requirements
+- <what this change accomplishes>
+
+## Reference
+- openspec/changes/<change-name>/tasks.md
+- openspec/changes/<change-name>/design.md
+
+## Acceptance Criteria
+- <how to verify completion>"
+
+# Push planning to main
+bd sync
+git add -A
+git commit -m "plan: <change-name>"
+git push
+
+# ═══════════════════════════════════════════════════════════════════
+# PHASE 2: Implement on feature branch
+# ═══════════════════════════════════════════════════════════════════
+git checkout -b feature/<change-name>
+
+# Claim the work
+bd update <id> --status in_progress
+
+# ... implement, referencing openspec/changes/<change-name>/ ...
+
+# Commit progress (run bd sync before each commit)
+bd sync
+git add <files>
+git commit -m "feat: <description>"
+
+# Push feature branch
+git push -u origin feature/<change-name>
+
+# ═══════════════════════════════════════════════════════════════════
+# PHASE 3: Prepare for PR
+# ═══════════════════════════════════════════════════════════════════
+# Close completed issues
+bd close <id> --reason "Completed"
+
+# Delete planning artifacts (git history preserves them)
+rm -rf openspec/changes/<change-name>
+
+# Final sync and push
+bd sync
+git add -A
+git commit -m "chore: cleanup planning artifacts"
+git push
+
+# Create PR
+gh pr create --title "feat: <change-name>" --body "## Summary
+- <what this PR accomplishes>
+
+## Test Plan
+- <how to verify>
+
+Closes #<issue-number>"
+
+# ═══════════════════════════════════════════════════════════════════
+# PHASE 4: After merge
+# ═══════════════════════════════════════════════════════════════════
+git checkout main
+git pull
+git branch -d feature/<change-name>              # Delete local branch
+git push origin --delete feature/<change-name>   # Delete remote branch (optional)
+```
+
+### Handling Long-Lived Branches
+
+For branches that last multiple days:
+
+```bash
+# Rebase regularly to stay current with main
+git fetch origin
+git rebase origin/main
+
+# If Beads conflicts occur, the merge driver handles most cases
+# For manual resolution, prefer the version with more recent timestamps
+```
+
+### When to Skip Feature Branches
+
+Use direct commits to `main` for:
+- Typo fixes
+- Documentation updates
+- Single-file config changes
+- Emergency hotfixes (with immediate follow-up)
+
 ## Label Conventions
 
 - `openspec:<change-name>` - Links issue to OpenSpec change
@@ -167,6 +305,17 @@ bd update <id> --add-note "Session end: <context>"     # Add context for next se
 
 #### 5. Sync and Push (MANDATORY)
 ALWAYS run `bd sync` before committing to capture issue changes.
+
+**On feature branch:**
+```bash
+bd sync
+git add -A
+git commit -m "wip: session end - <summary>"
+git push
+git status  # MUST show "up to date with origin"
+```
+
+**On main (or after merging):**
 ```bash
 bd sync
 git pull --rebase
@@ -178,7 +327,12 @@ git status  # MUST show "up to date with origin"
 
 #### 6. Clean Up
 - Clear stashes: `git stash clear` (if appropriate)
-- Prune remote branches if needed
+- Delete merged feature branches:
+  ```bash
+  git branch -d feature/<name>                    # Local
+  git push origin --delete feature/<name>         # Remote (if merged)
+  ```
+- Prune stale remote tracking branches: `git fetch --prune`
 
 #### 7. Verify Final State
 ```bash
