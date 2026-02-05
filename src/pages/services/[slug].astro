@@ -11,8 +11,12 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import SEO from '../../components/SEO.astro';
 import ServiceLD from '../../components/seo/ServiceLD.astro';
 import BreadcrumbLD from '../../components/seo/BreadcrumbLD.astro';
-import { getIconOrPlaceholder } from '../../components/icons/index';
+import Testimonials from '../../components/sections/Testimonials.astro';
+import Features from '../../components/sections/Features.astro';
+import FAQ from '../../components/sections/FAQ.astro';
+import CTA from '../../components/sections/CTA.astro';
 import { getAllServiceSlugs, getServiceBySlug } from '../../content/services/services.schema';
+import homepage from '../../data/homepage.schema';
 
 export function getStaticPaths() {
   const slugs = getAllServiceSlugs();
@@ -36,9 +40,6 @@ if (!service) {
   return Astro.redirect('/404');
 }
 
-// Get the icon SVG
-const iconSvg = getIconOrPlaceholder(service.icon);
-
 // Breadcrumb items for structured data
 const breadcrumbItems = [
   { name: 'Home', url: '/' },
@@ -56,27 +57,45 @@ const breadcrumbItems = [
 
   <Breadcrumbs currentPath={currentPath} />
 
-  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-    <!-- Service Header -->
-    <header class="mb-12">
-      <!-- Icon -->
-      <div
-        class="w-16 h-16 bg-primary-100 rounded-xl flex items-center justify-center mb-6 text-primary-600"
-      >
-        <div class="w-8 h-8" set:html={iconSvg} />
-      </div>
-
+  <!-- Hero Section -->
+  <section
+    class="relative bg-gradient-to-br from-primary-50 to-primary-100 py-16 sm:py-20 lg:py-24"
+  >
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <!-- Title -->
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-6">
         {service.title}
       </h1>
 
       <!-- Short Description -->
-      <p class="text-lg sm:text-xl text-neutral-600">
+      <p class="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto mb-8">
         {service.description}
       </p>
-    </header>
 
+      <!-- CTA Button -->
+      <a
+        href={service.cta.link}
+        class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors shadow-lg hover:shadow-xl"
+      >
+        {service.cta.text}
+        <svg
+          class="ml-2 w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
     <!-- Long Description -->
     <section class="mb-12">
       <div class="prose prose-neutral prose-lg max-w-none">
@@ -119,8 +138,39 @@ const breadcrumbItems = [
           ))
         }
       </div>
-    </section>
 
+      <!-- Small CTA -->
+      <div class="mt-8 text-center">
+        <a
+          href={service.cta.link}
+          class="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+        >
+          {service.cta.text}
+          <svg
+            class="ml-2 w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
+          </svg>
+        </a>
+      </div>
+    </section>
+  </article>
+
+  <!-- Why Choose Us Section -->
+  {homepage.features.length > 0 && <Features features={homepage.features} />}
+
+  <!-- Testimonials Section -->
+  {homepage.testimonials.length > 0 && <Testimonials testimonials={homepage.testimonials} />}
+
+  <div class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
     <!-- CTA Section -->
     <section class="bg-primary-50 rounded-2xl p-8 sm:p-12 text-center border border-primary-100">
       <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 mb-4">Ready to Get Started?</h2>
@@ -146,27 +196,14 @@ const breadcrumbItems = [
         </svg>
       </a>
     </section>
+  </div>
 
-    <!-- Back to Services Link -->
-    <div class="mt-12 pt-8 border-t border-neutral-200">
-      <a
-        href="/services"
-        class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
-      >
-        <svg
-          class="mr-2 w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
-        </svg>
-        Back to all services
-      </a>
-    </div>
-  </article>
+  <!-- FAQ Section -->
+  {homepage.faq.length > 0 && <FAQ items={homepage.faq} />}
+
+  <!-- Bottom CTA Section -->
+  <CTA
+    headline={`Ready to Get Started with ${service.title}?`}
+    button={{ text: service.cta.text, link: service.cta.link }}
+  />
 </PageLayout>
