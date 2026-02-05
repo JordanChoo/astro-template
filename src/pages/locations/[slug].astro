@@ -12,7 +12,12 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import SEO from '../../components/SEO.astro';
 import LocalBusinessLD from '../../components/seo/LocalBusinessLD.astro';
 import BreadcrumbLD from '../../components/seo/BreadcrumbLD.astro';
+import Features from '../../components/sections/Features.astro';
+import Testimonials from '../../components/sections/Testimonials.astro';
+import FAQ from '../../components/sections/FAQ.astro';
+import CTA from '../../components/sections/CTA.astro';
 import siteConfig from '../../config/site';
+import homepage from '../../data/homepage.schema';
 import {
   getAllLocationSlugs,
   getLocationBySlug,
@@ -107,183 +112,51 @@ const breadcrumbItems = [
 
   <Breadcrumbs currentPath={currentPath} />
 
-  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-    <!-- Location Header -->
-    <header class="mb-12">
-      <!-- Location Icon -->
-      <div
-        class="w-16 h-16 bg-primary-100 rounded-xl flex items-center justify-center mb-6 text-primary-600"
+  <!-- Hero Section -->
+  <section
+    class="relative bg-gradient-to-br from-primary-50 to-primary-100 py-16 sm:py-20 lg:py-24"
+  >
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <!-- Title -->
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-6">
+        {location.city}, {location.state}
+      </h1>
+
+      <!-- Short Description -->
+      <p class="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto mb-8">
+        {location.description}
+      </p>
+
+      <!-- CTA Button -->
+      <a
+        href="/contact"
+        class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors shadow-lg hover:shadow-xl"
       >
+        Contact This Location
         <svg
-          class="w-8 h-8"
+          class="ml-2 w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
-          stroke-width="1.5"
+          stroke-width="2"
           stroke="currentColor"
           aria-hidden="true"
         >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"></path>
+            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
         </svg>
-      </div>
+      </a>
+    </div>
+  </section>
 
-      <!-- City and State -->
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
-        {location.city}, {location.state}
-      </h1>
-
-      <!-- Short Description -->
-      <p class="text-lg sm:text-xl text-neutral-600">
-        {location.description}
-      </p>
-    </header>
-
-    <!-- Contact Information -->
-    <section class="mb-12 bg-neutral-50 rounded-xl p-6 sm:p-8 border border-neutral-200">
-      <h2 class="text-xl font-bold text-neutral-900 mb-6">Contact Information</h2>
-
-      <div class="space-y-4">
-        <!-- Address -->
-        <div class="flex items-start gap-4">
-          <div
-            class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"
-              ></path>
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-neutral-500 mb-1">Address</p>
-            <p class="text-neutral-900">{location.address}</p>
-          </div>
-        </div>
-
-        <!-- Phone -->
-        {
-          phoneNumber && (
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-neutral-500 mb-1">Phone</p>
-                <a
-                  href={`tel:${phoneNumber.replace(/[^\d+]/g, '')}`}
-                  class="text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  {phoneNumber}
-                </a>
-              </div>
-            </div>
-          )
-        }
-
-        <!-- Coordinates (if available) -->
-        {
-          location.coordinates && (
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-neutral-500 mb-1">Coordinates</p>
-                <p class="text-neutral-900 font-mono text-sm">
-                  {location.coordinates.lat.toFixed(4)}, {location.coordinates.lng.toFixed(4)}
-                </p>
-              </div>
-            </div>
-          )
-        }
-      </div>
-    </section>
-
+  <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
     <!-- Long Description -->
     <section class="mb-12">
-      <h2 class="text-xl font-bold text-neutral-900 mb-4">About This Location</h2>
       <div class="prose prose-neutral prose-lg max-w-none">
         <p class="text-neutral-700 leading-relaxed">
           {location.longDescription}
         </p>
-      </div>
-    </section>
-
-    <!-- Operating Hours (only if configured) -->
-    {
-      displayHours && (
-        <section class="mb-12">
-          <h2 class="text-xl font-bold text-neutral-900 mb-6">Operating Hours</h2>
-          <div class="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden">
-            <ul class="divide-y divide-neutral-200">
-              {displayHours.map((hours) => {
-                const [day, times] = hours.split(': ');
-                return (
-                  <li class="flex justify-between items-center px-6 py-3">
-                    <span class="font-medium text-neutral-900">{day}</span>
-                    <span class="text-neutral-600">{times}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </section>
-      )
-    }
-
-    <!-- Service Area Keywords -->
-    <section class="mb-12">
-      <h2 class="text-xl font-bold text-neutral-900 mb-4">Service Area</h2>
-      <p class="text-neutral-600 mb-4">We proudly serve clients throughout the following areas:</p>
-      <div class="flex flex-wrap gap-2">
-        {
-          location.serviceAreaKeywords.map((keyword) => (
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
-              {keyword}
-            </span>
-          ))
-        }
       </div>
     </section>
 
@@ -297,37 +170,224 @@ const breadcrumbItems = [
           <p class="text-neutral-600 mb-6">
             Our {location.city} office provides the full range of our professional services:
           </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
-              <a
-                href={`/services/${service.slug}`}
-                class="flex items-center gap-3 p-4 bg-white rounded-lg border border-neutral-200 hover:border-primary-300 hover:shadow-sm transition-all group"
-              >
-                <div class="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+              <div class="bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-md transition-shadow">
+                {/* Icon */}
+                <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 mb-4">
+                  {service.icon === 'briefcase' && (
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+                      />
+                    </svg>
+                  )}
+                  {service.icon === 'cog' && (
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  )}
+                  {service.icon === 'shield' && (
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                      />
+                    </svg>
+                  )}
+                  {service.icon === 'chart' && (
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
+                      />
+                    </svg>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h3 class="text-lg font-bold text-neutral-900 mb-2">{service.title}</h3>
+
+                {/* Description */}
+                <p class="text-neutral-600 text-sm mb-4">{service.description}</p>
+
+                {/* Learn More Link */}
+                <a
+                  href={`/services/${service.slug}`}
+                  class="inline-flex items-center text-primary-600 font-medium text-sm hover:text-primary-700 group"
+                >
+                  Learn more
                   <svg
-                    class="w-4 h-4"
+                    class="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke-width="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    />
+                  </svg>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+
+  <!-- Why Choose Us Section -->
+  {homepage.features.length > 0 && <Features features={homepage.features} />}
+
+  <!-- Testimonials Section -->
+  {homepage.testimonials.length > 0 && <Testimonials testimonials={homepage.testimonials} />}
+
+  <div class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <!-- Contact Information -->
+    <section class="mb-12 bg-neutral-50 rounded-xl p-6 sm:p-8 border border-neutral-200">
+      <h2 class="text-xl font-bold text-neutral-900 mb-6">Contact Information</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Left Column: Address & Phone -->
+        <div class="space-y-6">
+          <!-- Address -->
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-neutral-500 mb-1">Address</p>
+              <p class="text-neutral-900">{location.address}</p>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          {
+            phoneNumber && (
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
                     stroke="currentColor"
                     aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      d="M4.5 12.75l6 6 9-13.5"
+                      d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
                     />
                   </svg>
                 </div>
-                <span class="font-medium text-neutral-900 group-hover:text-primary-600 transition-colors">
-                  {service.title}
-                </span>
-              </a>
-            ))}
-          </div>
-        </section>
-      )
-    }
+                <div>
+                  <p class="text-sm font-medium text-neutral-500 mb-1">Phone</p>
+                  <a
+                    href={`tel:${phoneNumber.replace(/[^\d+]/g, '')}`}
+                    class="text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    {phoneNumber}
+                  </a>
+                </div>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Right Column: Operating Hours -->
+        {
+          displayHours && (
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-neutral-500 mb-2">Operating Hours</p>
+                <div class="space-y-1">
+                  {displayHours.map((hours) => {
+                    const [day, times] = hours.split(': ');
+                    return (
+                      <p class="text-sm text-neutral-900">
+                        <span class="font-medium">{day}:</span> {times}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </section>
 
     <!-- CTA Section -->
     <section class="bg-primary-50 rounded-2xl p-8 sm:p-12 text-center border border-primary-100">
@@ -356,28 +416,14 @@ const breadcrumbItems = [
         </svg>
       </a>
     </section>
+  </div>
 
-    <!-- Back to Locations Link -->
-    <div class="mt-12 pt-8 border-t border-neutral-200">
-      <a
-        href="/locations"
-        class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
-      >
-        <svg
-          class="mr-2 w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
-        </svg>
-        Back to all locations
-      </a>
-    </div>
-  </article>
+  <!-- FAQ Section -->
+  {homepage.faq.length > 0 && <FAQ items={homepage.faq} />}
+
+  <!-- Bottom CTA Section -->
+  <CTA
+    headline={`Ready to Get Started in ${location.city}?`}
+    button={{ text: 'Contact Us', link: '/contact' }}
+  />
 </PageLayout>
