@@ -27,13 +27,13 @@ export interface Props {
   /** Job title / role */
   jobTitle: string;
   /** URL to profile image */
-  image?: string;
+  image?: string | undefined;
   /** URL to person's profile page (relative or absolute) */
   url: string;
   /** Array of social profile URLs */
-  sameAs?: string[];
+  sameAs?: string[] | undefined;
   /** Short description / bio */
-  description?: string;
+  description?: string | undefined;
 }
 
 const { name, jobTitle, image, url, sameAs, description } = Astro.props;
@@ -54,9 +54,9 @@ interface PersonSchema {
   name: string;
   jobTitle: string;
   url: string;
-  image?: string;
-  description?: string;
-  sameAs?: string[];
+  image?: string | undefined;
+  description?: string | undefined;
+  sameAs?: string[] | undefined;
   worksFor: {
     '@type': 'Organization';
     name: string;

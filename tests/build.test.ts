@@ -10,5 +10,5 @@ describe('Build', () => {
         timeout: 120000,
       });
     }).not.toThrow();
-  });
+  }, 180000);
 });

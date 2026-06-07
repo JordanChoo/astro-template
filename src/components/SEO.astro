@@ -21,21 +21,21 @@ export interface Props {
   /** Page title (inserted into titleTemplate) */
   title: string;
   /** Meta description (warns if > 160 chars) */
-  description?: string;
+  description?: string | undefined;
   /** Canonical URL (defaults to current page URL) */
-  canonicalUrl?: string;
+  canonicalUrl?: string | undefined;
   /** Open Graph image URL (absolute or relative) */
-  image?: string;
+  image?: string | undefined;
   /** OG image width in pixels */
-  imageWidth?: number;
+  imageWidth?: number | undefined;
   /** OG image height in pixels */
-  imageHeight?: number;
+  imageHeight?: number | undefined;
   /** Whether to add noindex meta tag */
-  noindex?: boolean;
+  noindex?: boolean | undefined;
   /** Open Graph type (default: "website", use "article" for blog posts) */
-  type?: 'website' | 'article';
+  type?: 'website' | 'article' | undefined;
   /** Twitter handle for article author (without @) */
-  twitterCreator?: string;
+  twitterCreator?: string | undefined;
 }
 
 const {

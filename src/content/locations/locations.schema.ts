@@ -118,8 +118,7 @@ function validateLocationsData(): LocationsData {
   const result = LocationsDataSchema.safeParse(locationsData);
 
   if (!result.success) {
-    // Handle both Zod 3 (errors) and Zod 4 (issues) formats
-    const issues = 'issues' in result.error ? result.error.issues : result.error.errors;
+    const issues = result.error.issues;
     const errors = (issues as Array<{ path: (string | number)[]; message: string }>)
       .map((err) => `  - ${err.path.join('.')}: ${err.message}`)
       .join('\n');
@@ -222,8 +221,8 @@ export function formatSchemaOrgHours(hours: OperatingHoursEntry[]): string[] {
   return grouped.map((group) => {
     const daysStr =
       group.days.length > 1
-        ? `${group.days[0]}-${group.days[group.days.length - 1]}`
-        : group.days[0];
+        ? `${group.days[0]!}-${group.days[group.days.length - 1]!}`
+        : group.days[0]!;
     return `${daysStr} ${group.open}-${group.close}`;
   });
 }
@@ -239,7 +238,9 @@ export function formatDisplayHours(hours: OperatingHoursEntry[]): string[] {
    * Convert 24h time to 12h format with AM/PM
    */
   function formatTime(time24: string): string {
-    const [hours, minutes] = time24.split(':').map(Number);
+    const parts = time24.split(':').map(Number);
+    const hours = parts[0]!;
+    const minutes = parts[1]!;
     const period = hours >= 12 ? 'PM' : 'AM';
     const hours12 = hours % 12 || 12;
     return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;

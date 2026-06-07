@@ -16,7 +16,7 @@ interface Props {
 
 interface BreadcrumbItem {
   text: string;
-  href?: string;
+  href?: string | undefined;
 }
 
 const { currentPath } = Astro.props;
@@ -53,7 +53,7 @@ function buildBreadcrumbs(path: string): BreadcrumbItem[] {
   let currentHref = '';
 
   for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i];
+    const segment = segments[i]!;
     currentHref += `/${segment}`;
     const isLast = i === segments.length - 1;
 
@@ -92,8 +92,6 @@ function buildBreadcrumbs(path: string): BreadcrumbItem[] {
       });
     } else {
       // Slug segment (e.g., post-title, service-name, tag-name)
-      const _previousSegment = i > 0 ? segments[i - 1] : null;
-
       // Determine label based on context
       let text = slugToTitle(segment);
 

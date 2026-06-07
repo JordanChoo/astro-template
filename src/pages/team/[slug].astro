@@ -12,7 +12,6 @@
  */
 
 import { getCollection, render } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
 
 import PageLayout from '@/layouts/PageLayout.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
@@ -20,8 +19,6 @@ import SEO from '@/components/SEO.astro';
 import BreadcrumbLD from '@/components/seo/BreadcrumbLD.astro';
 import PersonLD from '@/components/seo/PersonLD.astro';
 import PostCard from '@/components/PostCard.astro';
-
-type TeamMember = CollectionEntry<'team'>;
 
 export async function getStaticPaths() {
   const allTeamMembers = await getCollection('team');
@@ -41,10 +38,6 @@ export async function getStaticPaths() {
     params: { slug: member.data.slug },
     props: { member },
   }));
-}
-
-interface Props {
-  member: TeamMember;
 }
 
 const { member } = Astro.props;

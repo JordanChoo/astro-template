@@ -17,7 +17,7 @@ interface NavLink {
   text: string;
   href: string;
   exact: boolean;
-  children?: NavLink[];
+  children?: NavLink[] | undefined;
 }
 
 // Build services dropdown children dynamically
@@ -490,13 +490,13 @@ function hasActiveChild(children: NavLink[]): boolean {
           // Shift+Tab: if on first element, wrap to last
           if (document.activeElement === firstElement) {
             event.preventDefault();
-            lastElement.focus();
+            lastElement?.focus();
           }
         } else {
           // Tab: if on last element, wrap to first
           if (document.activeElement === lastElement) {
             event.preventDefault();
-            firstElement.focus();
+            firstElement?.focus();
           }
         }
       }

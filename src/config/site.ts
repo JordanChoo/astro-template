@@ -37,13 +37,13 @@ export interface Address {
 
 /** Social media links */
 export interface SocialLinks {
-  facebook?: string;
-  instagram?: string;
+  facebook?: string | undefined;
+  instagram?: string | undefined;
   /** Also used as X */
-  twitter?: string;
-  linkedin?: string;
-  youtube?: string;
-  tiktok?: string;
+  twitter?: string | undefined;
+  linkedin?: string | undefined;
+  youtube?: string | undefined;
+  tiktok?: string | undefined;
 }
 
 /** SEO configuration */
@@ -53,11 +53,11 @@ export interface SeoConfig {
   /** Default meta description */
   defaultDescription: string;
   /** Path to default Open Graph image */
-  ogImage?: string;
+  ogImage?: string | undefined;
   /** OG image width (default 1200) */
-  ogImageWidth?: number;
+  ogImageWidth?: number | undefined;
   /** OG image height (default 630) */
-  ogImageHeight?: number;
+  ogImageHeight?: number | undefined;
   /** Full site URL including https:// */
   siteUrl: string;
 }
@@ -78,30 +78,30 @@ export interface SiteConfig {
   /** Required - business name */
   name: string;
   /** Optional tagline/slogan */
-  tagline?: string;
+  tagline?: string | undefined;
   /** Required - site description for SEO */
   description: string;
   /** Optional path to logo image */
-  logo?: string;
+  logo?: string | undefined;
 
   // Contact info (all optional)
-  phone?: string;
-  address?: Address;
+  phone?: string | undefined;
+  address?: Address | undefined;
 
   // Social links (all optional)
-  social?: SocialLinks;
+  social?: SocialLinks | undefined;
 
   /** Twitter handle for Twitter cards (without @) */
-  twitterHandle?: string;
+  twitterHandle?: string | undefined;
 
   /** SEO defaults */
   seo: SeoConfig;
 
   /** Google Tag Manager ID */
-  gtmId?: string;
+  gtmId?: string | undefined;
 
   /** Operating hours (optional, Schema.org aligned) */
-  operatingHours?: OperatingHoursEntry[];
+  operatingHours?: OperatingHoursEntry[] | undefined;
 
   /** Footer secondary navigation */
   footerNav: FooterNavItem[];
@@ -283,6 +283,5 @@ const siteConfig: SiteConfig = {
 // Run validation at import time
 validateConfig(siteConfig);
 
-// Export the config as default and the type
+// Export the config as default
 export default siteConfig;
-export type { SiteConfig };

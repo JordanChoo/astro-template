@@ -18,7 +18,9 @@ const currentPath = Astro.url.pathname;
  * Example: "09:00" -> "9:00 AM", "17:00" -> "5:00 PM"
  */
 function formatTime(time24: string): string {
-  const [hours, minutes] = time24.split(':').map(Number);
+  const parts = time24.split(':').map(Number);
+  const hours = parts[0]!;
+  const minutes = parts[1]!;
   const period = hours >= 12 ? 'PM' : 'AM';
   const hours12 = hours % 12 || 12;
   return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;

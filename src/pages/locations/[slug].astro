@@ -74,7 +74,7 @@ function parseAddress(
 } {
   // Extract zip code (last word that looks like a zip)
   const zipMatch = fullAddress.match(/\b(\d{5}(?:-\d{4})?)\b/);
-  const zip = zipMatch ? zipMatch[1] : '';
+  const zip = zipMatch ? (zipMatch[1] ?? '') : '';
 
   // Extract street (everything before city)
   const cityStateZipPattern = new RegExp(`\\s*,?\\s*${city}\\s*,?\\s*${state}\\s*${zip}\\s*$`, 'i');

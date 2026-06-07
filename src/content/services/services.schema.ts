@@ -93,8 +93,7 @@ function validateServicesData(): ServicesData {
   const result = ServicesDataSchema.safeParse(servicesData);
 
   if (!result.success) {
-    // Handle both Zod 3 (errors) and Zod 4 (issues) formats
-    const issues = 'issues' in result.error ? result.error.issues : result.error.errors;
+    const issues = result.error.issues;
     const errors = (issues as Array<{ path: (string | number)[]; message: string }>)
       .map((err) => `  - ${err.path.join('.')}: ${err.message}`)
       .join('\n');

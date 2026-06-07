@@ -18,7 +18,9 @@ import type { OperatingHoursEntry, DayOfWeek } from '@/config/site';
  * Formats a 24-hour time string to 12-hour format with AM/PM
  */
 function formatTime(time: string): string {
-  const [hours, minutes] = time.split(':').map(Number);
+  const parts = time.split(':').map(Number);
+  const hours = parts[0]!;
+  const minutes = parts[1]!;
   const period = hours >= 12 ? 'PM' : 'AM';
   const hour12 = hours % 12 || 12;
   return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
@@ -51,7 +53,7 @@ function formatOperatingHours(hours: OperatingHoursEntry[]): { days: string; tim
 
     if (lastGroup && lastGroup.open === entry.open && lastGroup.close === entry.close) {
       // Check if this day is consecutive
-      const lastDay = lastGroup.days[lastGroup.days.length - 1];
+      const lastDay = lastGroup.days[lastGroup.days.length - 1]!;
       const lastDayIndex = dayOrder.indexOf(lastDay);
       const currentDayIndex = dayOrder.indexOf(entry.dayOfWeek);
 
@@ -71,8 +73,8 @@ function formatOperatingHours(hours: OperatingHoursEntry[]): { days: string; tim
   return groups.map((group) => {
     const daysStr =
       group.days.length === 1
-        ? group.days[0]
-        : `${group.days[0]} - ${group.days[group.days.length - 1]}`;
+        ? group.days[0]!
+        : `${group.days[0]!} - ${group.days[group.days.length - 1]!}`;
 
     return {
       days: daysStr,

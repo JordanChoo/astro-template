@@ -28,6 +28,9 @@ export default defineConfig({
       lastmod: new Date(),
     }),
   ],
+  image: {
+    remotePatterns: [{ protocol: 'https' }],
+  },
   vite: {
     plugins: [tailwindcss()],
   },

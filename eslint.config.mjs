@@ -17,8 +17,8 @@ export default tseslint.config(
   // TypeScript ESLint recommended rules
   ...tseslint.configs.recommended,
 
-  // Astro plugin rules
-  ...eslintPluginAstro.configs.recommended,
+  // Astro plugin rules (flat config format for ESLint 9+)
+  ...eslintPluginAstro.configs['flat/recommended'],
 
   // Prettier compatibility (disables conflicting rules)
   eslintConfigPrettier,
@@ -55,6 +55,11 @@ export default tseslint.config(
   // Astro file-specific rules
   {
     files: ['**/*.astro'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
     rules: {
       // Astro components may have unused props that are still meaningful
       '@typescript-eslint/no-unused-vars': [

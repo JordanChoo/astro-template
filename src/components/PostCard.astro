@@ -39,9 +39,9 @@ interface Props {
   /** Array of tag slugs */
   tags: string[];
   /** Featured image URL (optional) */
-  image?: string;
+  image?: string | undefined;
   /** Whether this is a draft post (shows badge in dev mode) */
-  isDraft?: boolean;
+  isDraft?: boolean | undefined;
 }
 
 const { slug, title, description, pubDate, author, tags, image, isDraft = false } = Astro.props;

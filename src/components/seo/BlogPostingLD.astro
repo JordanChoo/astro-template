@@ -25,7 +25,7 @@ export interface BlogPostAuthor {
   /** Author's full name */
   name: string;
   /** URL to author's profile page (optional) */
-  url?: string;
+  url?: string | undefined;
 }
 
 export interface Props {
@@ -38,9 +38,9 @@ export interface Props {
   /** Author information */
   author: BlogPostAuthor;
   /** Featured image URL (optional, absolute or relative) */
-  image?: string;
+  image?: string | undefined;
   /** Last modified date in ISO 8601 format (optional) */
-  dateModified?: string;
+  dateModified?: string | undefined;
 }
 
 const { headline, description, datePublished, author, image, dateModified } = Astro.props;
@@ -58,7 +58,7 @@ function resolveUrl(url: string | undefined): string | undefined {
 interface PersonSchema {
   '@type': 'Person';
   name: string;
-  url?: string;
+  url?: string | undefined;
 }
 
 interface BlogPostingSchema {
@@ -67,18 +67,20 @@ interface BlogPostingSchema {
   headline: string;
   description: string;
   datePublished: string;
-  dateModified?: string;
+  dateModified?: string | undefined;
   author: PersonSchema;
   publisher: {
     '@type': 'Organization';
     name: string;
     url: string;
-    logo?: {
-      '@type': 'ImageObject';
-      url: string;
-    };
+    logo?:
+      | {
+          '@type': 'ImageObject';
+          url: string;
+        }
+      | undefined;
   };
-  image?: string;
+  image?: string | undefined;
   mainEntityOfPage: {
     '@type': 'WebPage';
     '@id': string;
