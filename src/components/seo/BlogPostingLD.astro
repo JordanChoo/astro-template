@@ -20,26 +20,19 @@
  */
 
 import siteConfig from '@/config/site';
+import type { ImageMeta } from '@/lib/content/types';
 
 export interface BlogPostAuthor {
-  /** Author's full name */
   name: string;
-  /** URL to author's profile page (optional) */
   url?: string | undefined;
 }
 
 export interface Props {
-  /** Article headline (typically the post title) */
   headline: string;
-  /** Article description/excerpt */
   description: string;
-  /** Publication date in ISO 8601 format (YYYY-MM-DD or full ISO string) */
   datePublished: string;
-  /** Author information */
   author: BlogPostAuthor;
-  /** Featured image URL (optional, absolute or relative) */
-  image?: string | undefined;
-  /** Last modified date in ISO 8601 format (optional) */
+  image?: ImageMeta | string | undefined;
   dateModified?: string | undefined;
 }
 
@@ -61,6 +54,13 @@ interface PersonSchema {
   url?: string | undefined;
 }
 
+interface ImageObjectSchema {
+  '@type': 'ImageObject';
+  url: string;
+  width?: number | undefined;
+  height?: number | undefined;
+}
+
 interface BlogPostingSchema {
   '@context': 'https://schema.org';
   '@type': 'BlogPosting';
@@ -80,7 +80,7 @@ interface BlogPostingSchema {
         }
       | undefined;
   };
-  image?: string | undefined;
+  image?: ImageObjectSchema | undefined;
   mainEntityOfPage: {
     '@type': 'WebPage';
     '@id': string;
@@ -125,9 +125,17 @@ if (dateModified) {
   schema.dateModified = dateModified;
 }
 
-const resolvedImage = resolveUrl(image);
-if (resolvedImage) {
-  schema.image = resolvedImage;
+if (image) {
+  const imageUrl = typeof image === 'string' ? image : image.url;
+  const resolved = resolveUrl(imageUrl);
+  if (resolved) {
+    const imageObj: ImageObjectSchema = { '@type': 'ImageObject', url: resolved };
+    if (typeof image === 'object') {
+      if (image.width) imageObj.width = image.width;
+      if (image.height) imageObj.height = image.height;
+    }
+    schema.image = imageObj;
+  }
 }
 
 const jsonLd = JSON.stringify(schema);

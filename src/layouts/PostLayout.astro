@@ -7,6 +7,7 @@
  */
 
 import PageLayout from './PageLayout.astro';
+import type { ImageMeta } from '@/lib/content/types';
 
 interface Author {
   name: string;
@@ -14,23 +15,29 @@ interface Author {
 }
 
 interface Props {
-  /** Post title */
   title: string;
-  /** Post description/excerpt */
   description: string;
-  /** Publication date */
   pubDate: Date;
-  /** Author information */
   author: Author;
-  /** Featured image URL (optional) */
-  image?: string | undefined;
-  /** Estimated reading time (e.g., "5 min read") */
+  image?: ImageMeta | string | undefined;
   readingTime: string;
-  /** Array of tag slugs */
   tags: string[];
+  isDraft?: boolean | undefined;
 }
 
-const { title, description: _description, pubDate, author, image, readingTime, tags } = Astro.props;
+const {
+  title,
+  description: _description,
+  pubDate,
+  author,
+  image,
+  readingTime,
+  tags,
+  isDraft = false,
+} = Astro.props;
+
+const imageUrl = typeof image === 'string' ? image : image?.url;
+const imageAlt = typeof image === 'object' && image?.alt ? image.alt : title;
 
 // Format date for display
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -49,9 +56,18 @@ const isoDate = pubDate.toISOString();
   <article class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
     <!-- Post Header -->
     <header class="mb-8">
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
-        {title}
-      </h1>
+      <div class="flex items-center gap-3 mb-4">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900">
+          {title}
+        </h1>
+        {
+          isDraft && import.meta.env.DEV && (
+            <span class="px-3 py-1 text-sm font-medium bg-amber-500 text-white rounded-md">
+              DRAFT
+            </span>
+          )
+        }
+      </div>
 
       <!-- Post Meta -->
       <div class="flex flex-wrap items-center gap-4 text-neutral-600 mb-4">
@@ -95,9 +111,14 @@ const isoDate = pubDate.toISOString();
 
     <!-- Featured Image -->
     {
-      image && (
+      imageUrl && (
         <figure class="mb-8">
-          <img src={image} alt="" class="w-full h-auto rounded-lg shadow-md" loading="eager" />
+          <img
+            src={imageUrl}
+            alt={imageAlt}
+            class="w-full h-auto rounded-lg shadow-md"
+            loading="eager"
+          />
         </figure>
       )
     }

@@ -20,31 +20,28 @@
  * ```
  */
 
+import type { ImageMeta } from '@/lib/content/types';
+
 interface Author {
   name: string;
   slug: string;
 }
 
 interface Props {
-  /** Post slug for URL */
   slug: string;
-  /** Post title */
   title: string;
-  /** Post description/excerpt */
   description: string;
-  /** Publication date */
   pubDate: Date;
-  /** Author information */
   author: Author;
-  /** Array of tag slugs */
   tags: string[];
-  /** Featured image URL (optional) */
-  image?: string | undefined;
-  /** Whether this is a draft post (shows badge in dev mode) */
+  image?: ImageMeta | string | undefined;
   isDraft?: boolean | undefined;
 }
 
 const { slug, title, description, pubDate, author, tags, image, isDraft = false } = Astro.props;
+
+const imageUrl = typeof image === 'string' ? image : image?.url;
+const imageAlt = typeof image === 'object' && image?.alt ? image.alt : '';
 
 // Format date for display
 const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -64,10 +61,10 @@ const hasMoreTags = tags.length > 3;
   {/* Featured Image */}
   <a href={`/blog/${slug}/`} class="block relative aspect-video overflow-hidden bg-neutral-100">
     {
-      image ? (
+      imageUrl ? (
         <img
-          src={image}
-          alt=""
+          src={imageUrl}
+          alt={imageAlt}
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
