@@ -2,18 +2,20 @@ import {
   isDirectusConfigured,
   fetchPublishedArticles,
   fetchCategories,
+  fetchPublishedCities,
   isLiveResult,
   normalizeArticles,
   normalizeCategories,
+  normalizeCities,
   readCache,
   writeCache,
   logDirectusDiagnostic,
   logger,
   redact,
 } from '../directus/index.js';
-import type { DirectusBlogArticle, DirectusBlogCategory } from '../directus/types.js';
-import { getLocalBlogPosts, getLocalBlogCategories } from './local.js';
-import type { BlogPost, BlogCategory } from './types.js';
+import type { DirectusBlogArticle, DirectusBlogCategory, DirectusCity } from '../directus/types.js';
+import { getLocalBlogPosts, getLocalBlogCategories, getLocalLocations } from './local.js';
+import type { BlogPost, BlogCategory, Location } from './types.js';
 
 let postsPromise: Promise<BlogPost[]> | null = null;
 let categoriesPromise: Promise<BlogCategory[]> | null = null;
@@ -113,4 +115,60 @@ export function getBlogCategories(): Promise<BlogCategory[]> {
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
   const posts = await getBlogPosts();
   return posts.find((p) => p.slug === slug);
+}
+
+let locationsPromise: Promise<Location[]> | null = null;
+
+async function resolveLocations(): Promise<Location[]> {
+  if (!isDirectusConfigured()) {
+    logDirectusDiagnostic({ source: 'not-configured' });
+    return getLocalLocations();
+  }
+
+  const startMs = Date.now();
+  const result = await fetchPublishedCities();
+
+  if (isLiveResult(result)) {
+    const locations = await normalizeCities(result.data);
+    writeCache('locations', result.data, result.siteSlug);
+    logDirectusDiagnostic({
+      source: 'live',
+      collections: { cities: locations.length },
+      fetchMs: Date.now() - startMs,
+      cache: { operation: 'written', path: '.cache/directus-locations.json' },
+    });
+    return locations;
+  }
+
+  const isRequired = import.meta.env.DIRECTUS_REQUIRED === 'true';
+  if (isRequired) {
+    throw new Error(`DIRECTUS_REQUIRED is true but CMS is unreachable: ${redact(result.error)}`);
+  }
+
+  const cached = readCache<DirectusCity>('locations');
+  if (cached) {
+    const locations = await normalizeCities(cached.data);
+    logDirectusDiagnostic({
+      source: 'cache',
+      collections: { cities: locations.length },
+      cache: { operation: 'read' },
+    });
+    return locations;
+  }
+
+  logger.warn('CMS unreachable and no cache — falling back to local locations');
+  logDirectusDiagnostic({ source: 'local' });
+  return getLocalLocations();
+}
+
+export function getLocations(): Promise<Location[]> {
+  if (!locationsPromise) {
+    locationsPromise = resolveLocations();
+  }
+  return locationsPromise;
+}
+
+export async function getLocationBySlug(slug: string): Promise<Location | undefined> {
+  const locations = await getLocations();
+  return locations.find((l) => l.slug === slug);
 }

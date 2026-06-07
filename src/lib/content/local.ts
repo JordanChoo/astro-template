@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import type { BlogPost, BlogCategory } from './types.js';
+import type { BlogPost, BlogCategory, Location } from './types.js';
 
 export async function getLocalBlogPosts(): Promise<BlogPost[]> {
   const entries = await getCollection('blog');
@@ -39,5 +39,21 @@ export async function getLocalBlogCategories(): Promise<BlogCategory[]> {
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, ''),
     postCount,
+  }));
+}
+
+export async function getLocalLocations(): Promise<Location[]> {
+  const { getSortedLocations } = await import('../../content/locations/locations.schema.js');
+  return getSortedLocations().map((loc) => ({
+    slug: loc.slug,
+    city: loc.city,
+    state: loc.state,
+    description: loc.description,
+    longDescription: loc.longDescription,
+    address: loc.address,
+    phone: loc.phone,
+    coordinates: loc.coordinates,
+    operatingHours: loc.operatingHours,
+    serviceAreaKeywords: loc.serviceAreaKeywords,
   }));
 }
