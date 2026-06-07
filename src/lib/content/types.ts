@@ -60,8 +60,17 @@ export interface LocationCoordinates {
   lng: number;
 }
 
+export type DayOfWeek =
+  | 'Monday'
+  | 'Tuesday'
+  | 'Wednesday'
+  | 'Thursday'
+  | 'Friday'
+  | 'Saturday'
+  | 'Sunday';
+
 export interface OperatingHoursEntry {
-  dayOfWeek: string;
+  dayOfWeek: DayOfWeek;
   open: string;
   close: string;
 }
