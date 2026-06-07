@@ -20,6 +20,11 @@ import type { BlogPost, BlogCategory, Location } from './types.js';
 let postsPromise: Promise<BlogPost[]> | null = null;
 let categoriesPromise: Promise<BlogCategory[]> | null = null;
 
+function isDirectusRequired(): boolean {
+  const value = import.meta.env.DIRECTUS_REQUIRED as unknown;
+  return value === true || value === 'true';
+}
+
 async function resolveBlogPosts(): Promise<BlogPost[]> {
   if (!isDirectusConfigured()) {
     logDirectusDiagnostic({ source: 'not-configured' });
@@ -41,8 +46,7 @@ async function resolveBlogPosts(): Promise<BlogPost[]> {
     return posts;
   }
 
-  const isRequired = import.meta.env.DIRECTUS_REQUIRED === 'true';
-  if (isRequired) {
+  if (isDirectusRequired()) {
     throw new Error(`DIRECTUS_REQUIRED is true but CMS is unreachable: ${redact(result.error)}`);
   }
 
@@ -140,8 +144,7 @@ async function resolveLocations(): Promise<Location[]> {
     return locations;
   }
 
-  const isRequired = import.meta.env.DIRECTUS_REQUIRED === 'true';
-  if (isRequired) {
+  if (isDirectusRequired()) {
     throw new Error(`DIRECTUS_REQUIRED is true but CMS is unreachable: ${redact(result.error)}`);
   }
 
