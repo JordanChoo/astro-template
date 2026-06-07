@@ -11,9 +11,11 @@
  * - /blog/2/, /blog/3/, etc. - Subsequent pages
  */
 
-import { getCollection, getEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 import type { GetStaticPathsOptions, Page } from 'astro';
-import type { CollectionEntry } from 'astro:content';
+
+import { getBlogPosts } from '@/lib/content/provider';
+import type { BlogPost } from '@/lib/content/types';
 
 import PageLayout from '@/layouts/PageLayout.astro';
 import SEO from '@/components/SEO.astro';
@@ -22,25 +24,13 @@ import PostCard from '@/components/PostCard.astro';
 import Pagination from '@/components/Pagination.astro';
 import pagesData from '@/data/pages.json';
 
-type BlogPost = CollectionEntry<'blog'>;
-
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  // Define constants inside getStaticPaths for Astro compilation
   const POSTS_PER_PAGE = 9;
 
-  // Get all blog posts
-  const allPosts = await getCollection('blog');
+  const allPosts = await getBlogPosts();
 
-  // Filter drafts in production
-  const isProduction = import.meta.env.PROD;
-  const filteredPosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
+  const sortedPosts = [...allPosts].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
-  // Sort by publication date (newest first)
-  const sortedPosts = filteredPosts.sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
-  );
-
-  // Generate paginated paths
   return paginate(sortedPosts, {
     pageSize: POSTS_PER_PAGE,
   });
@@ -52,18 +42,13 @@ interface Props {
 
 const { page } = Astro.props;
 
-// Handle redirect from /blog/1/ to /blog/
-// The page parameter will be undefined for /blog/ and "1" for /blog/1/
 const params = Astro.params;
 const pageParam = params.page;
 
-// If page param is "1", return 404 to prevent duplicate content
-// Users should be redirected to /blog/ instead
 if (pageParam === '1') {
   return Astro.redirect('/blog/', 301);
 }
 
-// Validate page number - return 404 for invalid page numbers
 const currentPage = page.currentPage;
 const totalPages = page.lastPage;
 
@@ -74,23 +59,19 @@ if (currentPage > totalPages && totalPages > 0) {
   });
 }
 
-// Get page SEO data
 const blogSeoData = pagesData.listings.blog;
 
-// Fetch author data for each post
 const postsWithAuthors = await Promise.all(
   page.data.map(async (post) => {
-    const author = await getEntry(post.data.author);
+    const author = post.author ? await getEntry('team', post.author) : undefined;
     return {
       post,
       author: author
         ? { name: author.data.name, slug: author.data.slug }
-        : { name: 'Unknown Author', slug: '' },
+        : { name: 'Unknown Author', slug: post.author || '' },
     };
   })
 );
-
-const isProduction = import.meta.env.PROD;
 ---
 
 <PageLayout title={blogSeoData.title}>
@@ -120,14 +101,14 @@ const isProduction = import.meta.env.PROD;
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {postsWithAuthors.map(({ post, author }) => (
             <PostCard
-              slug={post.id}
-              title={post.data.title}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
+              slug={post.slug}
+              title={post.title}
+              description={post.description}
+              pubDate={post.pubDate}
               author={author}
-              tags={post.data.tags}
-              image={post.data.image}
-              isDraft={!isProduction && post.data.draft}
+              tags={post.tags}
+              image={post.image}
+              isDraft={post.isDraft}
             />
           ))}
         </div>

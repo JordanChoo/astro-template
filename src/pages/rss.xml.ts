@@ -1,39 +1,32 @@
 /**
  * RSS Feed Endpoint
  *
- * Generates an RSS feed for the blog with the 25 most recent non-draft posts.
- * Includes title, description (as excerpt), link, pubDate, author, and categories.
+ * Generates an RSS feed for the blog with the 25 most recent published posts.
+ * Includes title, description, link, pubDate, author, and categories.
  *
  * @see https://docs.astro.build/en/guides/rss/
  */
 
 import rss from '@astrojs/rss';
-import { getCollection, getEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 import type { APIContext } from 'astro';
 import siteConfig from '@/config/site';
+import { getBlogPosts } from '@/lib/content/provider';
 
-/** Maximum number of posts to include in the feed */
 const MAX_ITEMS = 25;
 
 export async function GET(context: APIContext) {
-  // Get all blog posts
-  const allPosts = await getCollection('blog');
+  const allPosts = await getBlogPosts();
 
-  // Filter out drafts (RSS should only include published content)
-  const publishedPosts = allPosts.filter((post) => !post.data.draft);
+  const eligiblePosts = allPosts.filter((post) => !post.isDraft && post.sitemapEligible);
 
-  // Sort by publication date (newest first)
-  const sortedPosts = publishedPosts.sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
-  );
+  const sortedPosts = [...eligiblePosts].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
 
-  // Take only the most recent posts
   const recentPosts = sortedPosts.slice(0, MAX_ITEMS);
 
-  // Fetch author data for each post
   const postsWithAuthors = await Promise.all(
     recentPosts.map(async (post) => {
-      const author = await getEntry(post.data.author);
+      const author = post.author ? await getEntry('team', post.author) : undefined;
       return {
         post,
         authorName: author?.data.name ?? 'Unknown Author',
@@ -42,27 +35,20 @@ export async function GET(context: APIContext) {
   );
 
   return rss({
-    // RSS channel metadata
     title: siteConfig.name,
     description: siteConfig.description,
     site: context.site ?? siteConfig.seo.siteUrl,
 
-    // RSS items from blog posts
     items: postsWithAuthors.map(({ post, authorName }) => ({
-      title: post.data.title,
-      // Use description as excerpt
-      description: post.data.description,
-      // Link to the full post
-      link: `/blog/${post.id}/`,
-      // Publication date
-      pubDate: post.data.pubDate,
-      // Author name
+      title: post.title,
+      description: post.description,
+      link: `/blog/${post.slug}/`,
+      pubDate: post.pubDate,
       author: authorName,
-      // Categories (combined tags and categories)
-      categories: [...post.data.categories, ...post.data.tags],
+      categories: [...post.categories, ...post.tags],
+      ...(post.rendered?.html ? { content: post.rendered.html } : {}),
     })),
 
-    // Custom XML options
     customData: `<language>en-us</language>`,
   });
 }
