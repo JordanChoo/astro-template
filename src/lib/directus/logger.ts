@@ -6,10 +6,13 @@ const ENV_REDACTIONS = [
   { key: 'DIRECTUS_SITE_SLUG', mask: '[redacted-site-slug]' },
   { key: 'DIRECTUS_ASSET_BASE_URL', mask: '[redacted-asset-url]' },
 ] as const;
+const VALUE_SEPARATOR = '\u0000';
+const ENTRY_SEPARATOR = '\u0001';
 
 type EnvKey = (typeof ENV_REDACTIONS)[number]['key'];
 type Redaction = { pattern: RegExp; mask: string };
 type EnvRecord = Record<string, string | undefined>;
+type RedactionCache = { signature: string; redactions: Redaction[] };
 
 function readImportMetaEnv(key: EnvKey): string | undefined {
   const meta = import.meta as unknown as { env?: EnvRecord };
@@ -30,6 +33,12 @@ function getEnvValues(key: EnvKey): string[] {
   );
 
   return [...new Set(values)];
+}
+
+function getRedactionSignature(): string {
+  return ENV_REDACTIONS.map(({ key }) => `${key}=${getEnvValues(key).join(VALUE_SEPARATOR)}`).join(
+    ENTRY_SEPARATOR
+  );
 }
 
 function escapeRegExp(value: string): string {
@@ -66,13 +75,14 @@ function buildRedactions(): Redaction[] {
   return redactions;
 }
 
-let cachedRedactions: Redaction[] | null = null;
+let cachedRedactions: RedactionCache | null = null;
 
 function getRedactions(): Redaction[] {
-  if (!cachedRedactions) {
-    cachedRedactions = buildRedactions();
+  const signature = getRedactionSignature();
+  if (!cachedRedactions || cachedRedactions.signature !== signature) {
+    cachedRedactions = { signature, redactions: buildRedactions() };
   }
-  return cachedRedactions;
+  return cachedRedactions.redactions;
 }
 
 export function redact(message: unknown): string {

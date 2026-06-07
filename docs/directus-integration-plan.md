@@ -12,7 +12,7 @@ The integration must:
 
 - Fetch blog articles, blog categories, and cities from Directus when configured.
 - Map Directus `cities` to the template's existing Locations UI and `/locations/` routes.
-- Fall back to local content when Directus is not configured, unreachable, empty, or non-strict.
+- Fall back to local content when Directus is not configured, unreachable, or empty in non-strict mode.
 - Keep Team and Services local-only unless a future bead deliberately expands scope.
 - Keep this public repository free of secrets, tokens, private instance URLs, and infrastructure hints.
 

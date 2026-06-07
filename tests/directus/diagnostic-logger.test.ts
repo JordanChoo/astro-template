@@ -149,6 +149,23 @@ describe('Directus diagnostic logger', () => {
     expect(redact(message)).toBe(message);
   });
 
+  it('refreshes redactions when env values are configured after first use', () => {
+    assertions += 1;
+    console.log('[TEST] redact refreshes when Directus env appears later');
+
+    expect(redact('Initial call before Directus env is configured')).toBe(
+      'Initial call before Directus env is configured'
+    );
+
+    const configuredToken = makeTokenFixture();
+    process.env.DIRECTUS_TOKEN = configuredToken;
+
+    const result = redact(`Later output includes ${configuredToken}`);
+
+    expect(result).not.toContain(configuredToken);
+    expect(result).toContain('[redacted-token]');
+  });
+
   it('does not crash on empty string input', () => {
     assertions += 1;
     console.log('[TEST] redact handles empty string');
