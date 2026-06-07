@@ -87,6 +87,10 @@ async function resolveBlogCategories(): Promise<BlogCategory[]> {
     return categories;
   }
 
+  if (isDirectusRequired()) {
+    throw new Error(`DIRECTUS_REQUIRED is true but CMS is unreachable: ${redact(result.error)}`);
+  }
+
   const cached = readCache<DirectusBlogCategory>('blog_categories');
   if (cached) {
     const categories = normalizeCategories(cached.data);

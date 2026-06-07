@@ -48,6 +48,7 @@ const sanitizationSchema: Parameters<typeof rehypeSanitize>[0] & object = {
     'details',
     'summary',
     'input',
+    'span',
   ],
   attributes: {
     a: ['href', 'target', 'rel'],

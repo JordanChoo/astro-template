@@ -10,7 +10,7 @@ function normalizeStats(raw: Array<{ text: string }> | null): LocationStat[] | u
       (item): item is { text: string } => typeof item === 'object' && typeof item.text === 'string'
     )
     .map((item) => {
-      const parts = item.text.split(/[:–—–—]/, 2);
+      const parts = item.text.split(/[:–—]/, 2);
       return parts.length === 2
         ? { label: parts[0]!.trim(), value: parts[1]!.trim() }
         : { label: item.text, value: '' };

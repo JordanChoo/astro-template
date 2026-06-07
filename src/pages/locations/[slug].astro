@@ -47,6 +47,10 @@ const schemaOrgHours = location.operatingHours
   ? formatSchemaOrgHours(location.operatingHours)
   : undefined;
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function parseAddress(
   fullAddress: string,
   city: string,
@@ -59,7 +63,10 @@ function parseAddress(
 } {
   const zipMatch = fullAddress.match(/\b(\d{5}(?:-\d{4})?)\b/);
   const zip = zipMatch ? (zipMatch[1] ?? '') : '';
-  const cityStateZipPattern = new RegExp(`\\s*,?\\s*${city}\\s*,?\\s*${state}\\s*${zip}\\s*$`, 'i');
+  const cityStateZipPattern = new RegExp(
+    `\\s*,?\\s*${escapeRegExp(city)}\\s*,?\\s*${escapeRegExp(state)}\\s*${escapeRegExp(zip)}\\s*$`,
+    'i'
+  );
   const street = fullAddress.replace(cityStateZipPattern, '').replace(/,\s*$/, '').trim();
   return { street, city, state, zip };
 }
