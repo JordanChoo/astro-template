@@ -28,25 +28,36 @@ export function readCache<T>(collection: string): CachedData<T> | null {
 
   try {
     const raw = readFileSync(path, 'utf-8');
-    const parsed = JSON.parse(raw) as CacheFile<T>;
+    const parsed = JSON.parse(raw) as Partial<CacheFile<T>>;
+    const meta = parsed._meta;
 
-    if (!parsed._meta || parsed._meta.version !== 1) {
-      logger.warn(`Cache version mismatch for ${collection}, treating as miss`);
+    if (
+      !meta ||
+      meta.version !== 1 ||
+      typeof meta.siteSlug !== 'string' ||
+      typeof meta.cachedAt !== 'string'
+    ) {
+      logger.warn(`Cache metadata invalid for ${collection}, treating as miss`);
       return null;
     }
 
     const currentSlug = import.meta.env.DIRECTUS_SITE_SLUG ?? '';
-    if (currentSlug && parsed._meta.siteSlug !== currentSlug) {
+    if (meta.siteSlug !== currentSlug) {
       logger.warn(
-        `Cache site slug mismatch for ${collection} — expected current slug, got different slug. Treating as miss.`
+        `Cache site slug mismatch for ${collection} - expected current slug, got different slug. Treating as miss.`
       );
+      return null;
+    }
+
+    if (!Array.isArray(parsed.data)) {
+      logger.warn(`Cache data invalid for ${collection}, treating as miss`);
       return null;
     }
 
     return {
       data: parsed.data,
-      cachedAt: parsed._meta.cachedAt,
-      siteSlug: parsed._meta.siteSlug,
+      cachedAt: meta.cachedAt,
+      siteSlug: meta.siteSlug,
     };
   } catch {
     logger.warn(`Failed to read cache for ${collection}`);

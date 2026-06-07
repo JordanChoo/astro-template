@@ -11,6 +11,7 @@ interface CacheFixture {
 }
 
 let cacheDir: string;
+const isoTimestampPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 function createCacheFixture(overrides?: Partial<CacheFixture>): CacheFixture {
   return {
@@ -104,6 +105,35 @@ describe('Directus disk cache', () => {
       );
     });
 
+    it('returns null when the current Directus site slug is unset but the cache has a site slug', () => {
+      const collection = 'articles';
+      const cachedSiteSlug = 'site-alpha';
+      const currentSiteSlug = '';
+      const data = [createCacheFixture()];
+
+      writeCache(collection, data, cachedSiteSlug);
+      vi.stubEnv('DIRECTUS_SITE_SLUG', currentSiteSlug);
+
+      console.log('[TEST:cache] reading site-scoped cache with unset current slug', {
+        collection,
+        cachedSiteSlug,
+        currentSiteSlug,
+        cacheFile: cacheFilePath(collection),
+      });
+
+      const result = readCache<CacheFixture>(collection);
+
+      assertWithLog(
+        'unset current slug cache result',
+        {
+          actual: result,
+          expected: null,
+          testData: { collection, cachedSiteSlug, currentSiteSlug, data },
+        },
+        () => expect(result).toBeNull()
+      );
+    });
+
     it('returns null instead of throwing when the cache file contains invalid JSON', () => {
       const collection = 'articles';
       const invalidJson = '{ this is not valid json';
@@ -123,6 +153,42 @@ describe('Directus disk cache', () => {
           actual: result,
           expected: null,
           testData: { collection, invalidJson },
+        },
+        () => expect(result).toBeNull()
+      );
+    });
+
+    it('returns null when cache metadata is valid but data is not an array', () => {
+      const collection = 'articles';
+      const malformedCacheFile = {
+        _meta: {
+          version: 1,
+          siteSlug: 'site-alpha',
+          cachedAt: '2026-01-15T10:00:00.000Z',
+        },
+        data: { id: 'not-an-array' },
+      };
+
+      writeFileSync(
+        cacheFilePath(collection),
+        JSON.stringify(malformedCacheFile, null, 2),
+        'utf-8'
+      );
+
+      console.log('[TEST:cache] reading cache file with malformed data shape', {
+        collection,
+        cacheFile: cacheFilePath(collection),
+        malformedCacheFile,
+      });
+
+      const result = readCache<CacheFixture>(collection);
+
+      assertWithLog(
+        'malformed data cache result',
+        {
+          actual: result,
+          expected: null,
+          testData: { collection, malformedCacheFile },
         },
         () => expect(result).toBeNull()
       );
@@ -170,16 +236,14 @@ describe('Directus disk cache', () => {
         () => expect(result?.siteSlug).toBe(siteSlug)
       );
 
-      const parsedCachedAt = result?.cachedAt ? Date.parse(result.cachedAt) : Number.NaN;
-
       assertWithLog(
         'cachedAt is an ISO timestamp',
         {
           actual: result?.cachedAt,
-          expected: 'valid ISO timestamp',
+          expected: isoTimestampPattern.toString(),
           testData: { collection, siteSlug, data },
         },
-        () => expect(Number.isNaN(parsedCachedAt)).toBe(false)
+        () => expect(result?.cachedAt).toMatch(isoTimestampPattern)
       );
     });
 
