@@ -8,9 +8,10 @@
 
 import siteConfig from '../config/site';
 import { getSortedServices } from '../content/services/services.schema';
+import { getLocations } from '@/lib/content/provider';
 
-// Get services for dropdown
 const servicesForNav = getSortedServices();
+const locations = await getLocations();
 
 // Navigation link type with optional children for dropdowns
 interface NavLink {
@@ -27,7 +28,6 @@ const servicesChildren: NavLink[] = servicesForNav.map((service) => ({
   exact: false,
 }));
 
-// Navigation links for the site
 const navLinks: NavLink[] = [
   { text: 'Home', href: '/', exact: true },
   {
@@ -45,7 +45,7 @@ const navLinks: NavLink[] = [
     exact: false,
     children: servicesChildren,
   },
-  { text: 'Locations', href: '/locations', exact: false },
+  ...(locations.length > 0 ? [{ text: 'Locations', href: '/locations', exact: false }] : []),
   { text: 'Blog', href: '/blog', exact: false },
 ];
 
