@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "node scripts/audit-build.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
