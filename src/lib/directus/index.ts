@@ -9,6 +9,8 @@ export {
 
 export { normalizeArticles, normalizeCategories } from './normalize.js';
 
+export { normalizeCity, normalizeCities } from './normalize-locations.js';
+
 export type { DirectusFetchOutcome } from './types.js';
 
 export { resolveAssetUrl, assertNoTokenLeakage } from './assets.js';
