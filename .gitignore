@@ -32,3 +32,10 @@ prd/
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# IDE MCP config files
+*.mcp.json
+*.mcp.json.*.bak
+
+# ntm (multi-agent tmux) sessions
+.ntm/
