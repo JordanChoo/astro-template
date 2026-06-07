@@ -3,12 +3,14 @@
  * Individual Blog Post Page
  *
  * Renders a single blog post with PostLayout.
+ * Supports dual rendering: CMS pre-rendered HTML or Astro native render.
  * Includes BlogPostingLD and BreadcrumbLD for structured data.
- * Uses SEO component with post-specific metadata.
  */
 
-import { getCollection, getEntry, render } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, render } from 'astro:content';
+
+import { getBlogPosts } from '@/lib/content/provider';
+import type { BlogPost, BlogPostHeading } from '@/lib/content/types';
 
 import PostLayout from '@/layouts/PostLayout.astro';
 import SEO from '@/components/SEO.astro';
@@ -20,17 +22,11 @@ import { getRelatedPosts } from '@/utils/related-posts';
 import PostCard from '@/components/PostCard.astro';
 import siteConfig from '@/config/site';
 
-type BlogPost = CollectionEntry<'blog'>;
-
 export async function getStaticPaths() {
-  const allPosts = await getCollection('blog');
+  const allPosts = await getBlogPosts();
 
-  // In production, only generate pages for non-draft posts
-  const isProduction = import.meta.env.PROD;
-  const filteredPosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
-
-  return filteredPosts.map((post) => ({
-    params: { slug: post.id },
+  return allPosts.map((post) => ({
+    params: { slug: post.slug },
     props: { post },
   }));
 }
@@ -41,85 +37,105 @@ interface Props {
 
 const { post } = Astro.props;
 
-// Render the post content
-const { Content } = await render(post);
+// Dual rendering: CMS pre-rendered HTML vs Astro native render
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let ContentComponent: any = null;
+let _headings: BlogPostHeading[] = [];
 
-// Get the raw body content for reading time calculation
-// Note: In Astro 5.x, we need to use the body property
-const bodyContent = post.body ?? '';
+if (post.rendered) {
+  _headings = post.rendered.headings;
+} else {
+  const entry = await getEntry('blog', post.slug);
+  if (entry) {
+    const rendered = await render(entry);
+    ContentComponent = rendered.Content;
+    _headings = rendered.headings.map((h) => ({
+      depth: h.depth,
+      slug: h.slug,
+      text: h.text,
+    }));
+  }
+}
 
-// Calculate reading time
-const readingTimeMinutes = calculateReadingTime(bodyContent);
+// Reading time from raw markdown content
+const readingTimeMinutes = calculateReadingTime(post.content);
 const readingTime = `${readingTimeMinutes} min read`;
 
-// Get author data
-const author = await getEntry(post.data.author);
+// Author resolution
+const author = post.author ? await getEntry('team', post.author) : undefined;
 const authorData = author
   ? { name: author.data.name, slug: author.data.slug }
-  : { name: 'Unknown Author', slug: '' };
+  : { name: 'Unknown Author', slug: post.author || '' };
 
-// Get related posts
-const allPosts = await getCollection('blog');
-const isProduction = import.meta.env.PROD;
-const visiblePosts = isProduction ? allPosts.filter((p) => !p.data.draft) : allPosts;
-const relatedPosts = getRelatedPosts(post, visiblePosts, 3);
+// Related posts
+const allPosts = await getBlogPosts();
+const relatedPosts = getRelatedPosts(post, allPosts, 3);
 
-// Fetch author data for related posts
 const relatedPostsWithAuthors = await Promise.all(
   relatedPosts.map(async (relatedPost) => {
-    const relatedAuthor = await getEntry(relatedPost.data.author);
+    const relatedAuthor = relatedPost.author
+      ? await getEntry('team', relatedPost.author)
+      : undefined;
     return {
       post: relatedPost,
       author: relatedAuthor
         ? { name: relatedAuthor.data.name, slug: relatedAuthor.data.slug }
-        : { name: 'Unknown Author', slug: '' },
+        : { name: 'Unknown Author', slug: relatedPost.author || '' },
     };
   })
 );
 
-// Prepare breadcrumb data
 const breadcrumbItems = [
   { name: 'Home', url: '/' },
   { name: 'Blog', url: '/blog/' },
-  { name: post.data.title, url: `/blog/${post.id}/` },
+  { name: post.title, url: `/blog/${post.slug}/` },
 ];
 
-// Normalize tags to lowercase with hyphens
-const normalizedTags = post.data.tags.map((tag) => tag.toLowerCase().replace(/\s+/g, '-'));
+const normalizedTags = post.tags.map((tag) => tag.toLowerCase().replace(/\s+/g, '-'));
 ---
 
 <PostLayout
-  title={post.data.title}
-  description={post.data.description}
-  pubDate={post.data.pubDate}
+  title={post.title}
+  description={post.description}
+  pubDate={post.pubDate}
   author={authorData}
-  image={post.data.image}
+  image={post.image}
   readingTime={readingTime}
   tags={normalizedTags}
+  isDraft={post.isDraft}
 >
   <Fragment slot="head">
     <SEO
-      title={post.data.title}
-      description={post.data.description}
-      image={post.data.image}
+      title={post.seo?.titleTag ?? post.title}
+      description={post.seo?.metaDescription ?? post.description}
+      image={post.image}
       type="article"
+      seo={post.seo}
     />
     <BlogPostingLD
-      headline={post.data.title}
-      description={post.data.description}
-      datePublished={post.data.pubDate.toISOString()}
+      headline={post.title}
+      description={post.description}
+      datePublished={post.pubDate.toISOString()}
       author={{
         name: authorData.name,
         url: authorData.slug ? `${siteConfig.seo.siteUrl}/team/${authorData.slug}/` : undefined,
       }}
-      image={post.data.image}
+      image={post.image}
     />
     <BreadcrumbLD items={breadcrumbItems} />
   </Fragment>
 
   <Breadcrumbs currentPath={Astro.url.pathname} />
 
-  <Content />
+  {
+    post.rendered ? (
+      <Fragment set:html={post.rendered.html} />
+    ) : ContentComponent ? (
+      <ContentComponent />
+    ) : (
+      <p>Content not available.</p>
+    )
+  }
 
   {/* Related Posts Section */}
   {
@@ -129,14 +145,14 @@ const normalizedTags = post.data.tags.map((tag) => tag.toLowerCase().replace(/\s
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           {relatedPostsWithAuthors.map(({ post: relatedPost, author: relatedAuthor }) => (
             <PostCard
-              slug={relatedPost.id}
-              title={relatedPost.data.title}
-              description={relatedPost.data.description}
-              pubDate={relatedPost.data.pubDate}
+              slug={relatedPost.slug}
+              title={relatedPost.title}
+              description={relatedPost.description}
+              pubDate={relatedPost.pubDate}
               author={relatedAuthor}
-              tags={relatedPost.data.tags}
-              image={relatedPost.data.image}
-              isDraft={!isProduction && relatedPost.data.draft}
+              tags={relatedPost.tags}
+              image={relatedPost.image}
+              isDraft={relatedPost.isDraft}
             />
           ))}
         </div>

@@ -6,9 +6,7 @@
  * @module utils/related-posts
  */
 
-import type { CollectionEntry } from 'astro:content';
-
-type BlogPost = CollectionEntry<'blog'>;
+import type { BlogPost } from '@/lib/content/types';
 
 /**
  * Simple hash function for deterministic pseudo-random selection
@@ -62,19 +60,19 @@ export function getRelatedPosts(
   limit: number = 3
 ): BlogPost[] {
   // Filter out the current post
-  const otherPosts = allPosts.filter((post) => post.id !== currentPost.id);
+  const otherPosts = allPosts.filter((post) => post.slug !== currentPost.slug);
 
   if (otherPosts.length === 0) {
     return [];
   }
 
-  const currentTags = currentPost.data.tags;
-  const currentCategories = currentPost.data.categories;
+  const currentTags = currentPost.tags;
+  const currentCategories = currentPost.categories;
 
   // Score each post based on shared tags and categories
   const scoredPosts = otherPosts.map((post) => {
-    const sharedTags = countSharedElements(currentTags, post.data.tags);
-    const sharedCategories = countSharedElements(currentCategories, post.data.categories);
+    const sharedTags = countSharedElements(currentTags, post.tags);
+    const sharedCategories = countSharedElements(currentCategories, post.categories);
 
     // Tags are weighted more heavily than categories
     // Each shared tag is worth 10 points, each shared category is worth 5 points
@@ -84,7 +82,7 @@ export function getRelatedPosts(
   });
 
   // Sort by score (descending), then by deterministic pseudo-random for ties
-  const currentSlugHash = hashString(currentPost.id);
+  const currentSlugHash = hashString(currentPost.slug);
 
   scoredPosts.sort((a, b) => {
     // Primary sort: by score (descending)
@@ -93,8 +91,8 @@ export function getRelatedPosts(
     }
 
     // Secondary sort: deterministic pseudo-random based on combined slug hashes
-    const hashA = hashString(a.post.id) ^ currentSlugHash;
-    const hashB = hashString(b.post.id) ^ currentSlugHash;
+    const hashA = hashString(a.post.slug) ^ currentSlugHash;
+    const hashB = hashString(b.post.slug) ^ currentSlugHash;
     return hashA - hashB;
   });
 
@@ -105,8 +103,8 @@ export function getRelatedPosts(
   if (!hasAnyMatches) {
     // Sort purely by deterministic hash
     scoredPosts.sort((a, b) => {
-      const hashA = hashString(a.post.id) ^ currentSlugHash;
-      const hashB = hashString(b.post.id) ^ currentSlugHash;
+      const hashA = hashString(a.post.slug) ^ currentSlugHash;
+      const hashB = hashString(b.post.slug) ^ currentSlugHash;
       return hashA - hashB;
     });
   }
