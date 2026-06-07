@@ -3,62 +3,21 @@
  * Categories Index Page
  *
  * Lists all categories with their post counts.
- * Categories are lowercased and slugified (spaces to hyphens).
- * Excludes categories with 0 visible posts.
+ * Uses getBlogCategories() from provider for CMS-aware categories
+ * with fallback to frontmatter-derived categories for local content.
  */
 
-import { getCollection } from 'astro:content';
+import { getBlogCategories } from '@/lib/content/provider';
 
 import PageLayout from '@/layouts/PageLayout.astro';
 import SEO from '@/components/SEO.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 
-// Get all blog posts
-const allPosts = await getCollection('blog');
+const categories = await getBlogCategories();
 
-// Filter drafts in production
-const isProduction = import.meta.env.PROD;
-const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
-
-/**
- * Normalize a category to URL-friendly format
- */
-function slugifyCategory(category: string): string {
-  return category.toLowerCase().replace(/\s+/g, '-');
-}
-
-/**
- * Build category counts from visible posts
- */
-function getCategoryCounts(): Map<string, { display: string; slug: string; count: number }> {
-  const categoryMap = new Map<string, { display: string; slug: string; count: number }>();
-
-  for (const post of visiblePosts) {
-    for (const category of post.data.categories) {
-      const slug = slugifyCategory(category);
-
-      if (categoryMap.has(slug)) {
-        const existing = categoryMap.get(slug)!;
-        existing.count += 1;
-      } else {
-        categoryMap.set(slug, {
-          display: category,
-          slug,
-          count: 1,
-        });
-      }
-    }
-  }
-
-  return categoryMap;
-}
-
-const categoryCounts = getCategoryCounts();
-
-// Convert to sorted array (alphabetically by display name)
-const sortedCategories = Array.from(categoryCounts.values())
-  .filter((category) => category.count > 0)
-  .sort((a, b) => a.display.localeCompare(b.display));
+const sortedCategories = [...categories]
+  .filter((cat) => cat.postCount > 0)
+  .sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <PageLayout title="Categories">
@@ -104,11 +63,11 @@ const sortedCategories = Array.from(categoryCounts.values())
                   />
                 </svg>
                 <span class="font-medium text-neutral-900 group-hover:text-primary-700">
-                  {category.display}
+                  {category.name}
                 </span>
               </div>
               <span class="inline-flex items-center justify-center min-w-[2rem] h-7 px-2 text-sm font-semibold bg-neutral-100 text-neutral-600 rounded-full group-hover:bg-primary-100 group-hover:text-primary-700 transition-colors">
-                {category.count}
+                {category.postCount}
               </span>
             </a>
           ))}

@@ -7,34 +7,23 @@
  * Excludes tags with 0 visible posts.
  */
 
-import { getCollection } from 'astro:content';
+import { getBlogPosts } from '@/lib/content/provider';
 
 import PageLayout from '@/layouts/PageLayout.astro';
 import SEO from '@/components/SEO.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 
-// Get all blog posts
-const allPosts = await getCollection('blog');
+const allPosts = await getBlogPosts();
 
-// Filter drafts in production
-const isProduction = import.meta.env.PROD;
-const visiblePosts = isProduction ? allPosts.filter((post) => !post.data.draft) : allPosts;
-
-/**
- * Normalize a tag to URL-friendly format
- */
 function slugifyTag(tag: string): string {
   return tag.toLowerCase().replace(/\s+/g, '-');
 }
 
-/**
- * Build tag counts from visible posts
- */
 function getTagCounts(): Map<string, { display: string; slug: string; count: number }> {
   const tagMap = new Map<string, { display: string; slug: string; count: number }>();
 
-  for (const post of visiblePosts) {
-    for (const tag of post.data.tags) {
+  for (const post of allPosts) {
+    for (const tag of post.tags) {
       const slug = slugifyTag(tag);
 
       if (tagMap.has(slug)) {
@@ -55,7 +44,6 @@ function getTagCounts(): Map<string, { display: string; slug: string; count: num
 
 const tagCounts = getTagCounts();
 
-// Convert to sorted array (alphabetically by display name)
 const sortedTags = Array.from(tagCounts.values())
   .filter((tag) => tag.count > 0)
   .sort((a, b) => a.display.localeCompare(b.display));
