@@ -79,7 +79,7 @@ function countWords(text: string): number {
  *
  * @example
  * ```typescript
- * const readingTime = calculateReadingTime(post.body);
+ * const readingTime = calculateReadingTime(post.content);
  * console.log(`${readingTime} min read`); // "5 min read"
  * ```
  */

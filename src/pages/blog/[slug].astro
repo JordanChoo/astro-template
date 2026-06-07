@@ -10,7 +10,7 @@
 import { getEntry, render } from 'astro:content';
 
 import { getBlogPosts } from '@/lib/content/provider';
-import type { BlogPost, BlogPostHeading } from '@/lib/content/types';
+import type { BlogPost } from '@/lib/content/types';
 
 import PostLayout from '@/layouts/PostLayout.astro';
 import SEO from '@/components/SEO.astro';
@@ -24,8 +24,9 @@ import siteConfig from '@/config/site';
 
 export async function getStaticPaths() {
   const allPosts = await getBlogPosts();
+  const posts = import.meta.env.PROD ? allPosts.filter((post) => !post.isDraft) : allPosts;
 
-  return allPosts.map((post) => ({
+  return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -37,25 +38,11 @@ interface Props {
 
 const { post } = Astro.props;
 
-// Dual rendering: CMS pre-rendered HTML vs Astro native render
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let ContentComponent: any = null;
-let _headings: BlogPostHeading[] = [];
-
-if (post.rendered) {
-  _headings = post.rendered.headings;
-} else {
-  const entry = await getEntry('blog', post.slug);
-  if (entry) {
-    const rendered = await render(entry);
-    ContentComponent = rendered.Content;
-    _headings = rendered.headings.map((h) => ({
-      depth: h.depth,
-      slug: h.slug,
-      text: h.text,
-    }));
-  }
-}
+// CMS posts carry sanitized HTML. Local posts still use Astro's native renderer.
+const localEntry = post.rendered ? undefined : await getEntry('blog', post.slug);
+const localRender =
+  localEntry && (localEntry.body ?? '') === post.content ? await render(localEntry) : undefined;
+const LocalContent = localRender?.Content;
 
 // Reading time from raw markdown content
 const readingTimeMinutes = calculateReadingTime(post.content);
@@ -69,7 +56,10 @@ const authorData = author
 
 // Related posts
 const allPosts = await getBlogPosts();
-const relatedPosts = getRelatedPosts(post, allPosts, 3);
+const visiblePosts = import.meta.env.PROD
+  ? allPosts.filter((candidate) => !candidate.isDraft)
+  : allPosts;
+const relatedPosts = getRelatedPosts(post, visiblePosts, 3);
 
 const relatedPostsWithAuthors = await Promise.all(
   relatedPosts.map(async (relatedPost) => {
@@ -106,8 +96,8 @@ const normalizedTags = post.tags.map((tag) => tag.toLowerCase().replace(/\s+/g, 
 >
   <Fragment slot="head">
     <SEO
-      title={post.seo?.titleTag ?? post.title}
-      description={post.seo?.metaDescription ?? post.description}
+      title={post.title}
+      description={post.description}
       image={post.image}
       type="article"
       seo={post.seo}
@@ -130,8 +120,8 @@ const normalizedTags = post.tags.map((tag) => tag.toLowerCase().replace(/\s+/g, 
   {
     post.rendered ? (
       <Fragment set:html={post.rendered.html} />
-    ) : ContentComponent ? (
-      <ContentComponent />
+    ) : LocalContent ? (
+      <LocalContent />
     ) : (
       <p>Content not available.</p>
     )
