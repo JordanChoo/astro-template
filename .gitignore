@@ -17,8 +17,18 @@ pnpm-debug.log*
 .env
 .env.production
 
+# directus cache
+.cache/
+
+# planning docs (local only)
+prd/
+
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+.claude/settings.local.json
+
+# bv (beads viewer) local config and caches
+.bv/
