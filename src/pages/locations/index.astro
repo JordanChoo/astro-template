@@ -10,16 +10,19 @@ import PageLayout from '../../layouts/PageLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import SEO from '../../components/SEO.astro';
 import LocationCard from '../../components/LocationCard.astro';
-import { getSortedLocations } from '../../content/locations/locations.schema';
+import { getLocations } from '@/lib/content/provider';
 import { getListingMeta } from '../../data/pages.schema';
 
 const currentPath = Astro.url.pathname;
 
-// Get page metadata from pages.json
 const pageMeta = getListingMeta('locations');
 
-// Get all locations sorted by city, then state
-const locations = getSortedLocations();
+const allLocations = await getLocations();
+const locations = [...allLocations].sort((a, b) => {
+  const cityCompare = a.city.localeCompare(b.city);
+  if (cityCompare !== 0) return cityCompare;
+  return (a.state ?? '').localeCompare(b.state ?? '');
+});
 ---
 
 <PageLayout title={pageMeta.title}>
@@ -47,7 +50,7 @@ const locations = getSortedLocations();
             <LocationCard
               slug={location.slug}
               city={location.city}
-              state={location.state}
+              state={location.state ?? ''}
               description={location.description}
             />
           ))}
