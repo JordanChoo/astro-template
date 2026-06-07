@@ -10,6 +10,7 @@
 import { getEntry, render } from 'astro:content';
 
 import { getBlogPosts } from '@/lib/content/provider';
+import { resolveAuthorOrFallback } from '@/lib/content/authors';
 import type { BlogPost } from '@/lib/content/types';
 
 import PostLayout from '@/layouts/PostLayout.astro';
@@ -48,11 +49,7 @@ const LocalContent = localRender?.Content;
 const readingTimeMinutes = calculateReadingTime(post.content);
 const readingTime = `${readingTimeMinutes} min read`;
 
-// Author resolution
-const author = post.author ? await getEntry('team', post.author) : undefined;
-const authorData = author
-  ? { name: author.data.name, slug: author.data.slug }
-  : { name: 'Unknown Author', slug: post.author || '' };
+const authorData = await resolveAuthorOrFallback(post.author);
 
 // Related posts
 const allPosts = await getBlogPosts();
@@ -62,17 +59,10 @@ const visiblePosts = import.meta.env.PROD
 const relatedPosts = getRelatedPosts(post, visiblePosts, 3);
 
 const relatedPostsWithAuthors = await Promise.all(
-  relatedPosts.map(async (relatedPost) => {
-    const relatedAuthor = relatedPost.author
-      ? await getEntry('team', relatedPost.author)
-      : undefined;
-    return {
-      post: relatedPost,
-      author: relatedAuthor
-        ? { name: relatedAuthor.data.name, slug: relatedAuthor.data.slug }
-        : { name: 'Unknown Author', slug: relatedPost.author || '' },
-    };
-  })
+  relatedPosts.map(async (relatedPost) => ({
+    post: relatedPost,
+    author: await resolveAuthorOrFallback(relatedPost.author),
+  }))
 );
 
 const breadcrumbItems = [

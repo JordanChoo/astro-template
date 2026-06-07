@@ -11,10 +11,10 @@
  * - /blog/2/, /blog/3/, etc. - Subsequent pages
  */
 
-import { getEntry } from 'astro:content';
 import type { GetStaticPathsOptions, Page } from 'astro';
 
 import { getBlogPosts } from '@/lib/content/provider';
+import { resolveAuthorOrFallback } from '@/lib/content/authors';
 import type { BlogPost } from '@/lib/content/types';
 
 import PageLayout from '@/layouts/PageLayout.astro';
@@ -62,15 +62,10 @@ if (currentPage > totalPages && totalPages > 0) {
 const blogSeoData = pagesData.listings.blog;
 
 const postsWithAuthors = await Promise.all(
-  page.data.map(async (post) => {
-    const author = post.author ? await getEntry('team', post.author) : undefined;
-    return {
-      post,
-      author: author
-        ? { name: author.data.name, slug: author.data.slug }
-        : { name: 'Unknown Author', slug: post.author || '' },
-    };
-  })
+  page.data.map(async (post) => ({
+    post,
+    author: await resolveAuthorOrFallback(post.author),
+  }))
 );
 ---
 

@@ -10,10 +10,10 @@
  * - /blog/categories/[category]/2/, etc. - Subsequent pages
  */
 
-import { getEntry } from 'astro:content';
 import type { GetStaticPathsOptions, Page } from 'astro';
 
 import { getBlogPosts, getBlogCategories } from '@/lib/content/provider';
+import { resolveAuthorOrFallback } from '@/lib/content/authors';
 import type { BlogPost } from '@/lib/content/types';
 
 import PageLayout from '@/layouts/PageLayout.astro';
@@ -81,15 +81,10 @@ const pageTitle = categoriesSeoData.titleTemplate.replace('%s', categoryDisplay)
 const pageDescription = categoriesSeoData.descriptionTemplate.replace('%s', categoryDisplay);
 
 const postsWithAuthors = await Promise.all(
-  page.data.map(async (post) => {
-    const author = post.author ? await getEntry('team', post.author) : undefined;
-    return {
-      post,
-      author: author
-        ? { name: author.data.name, slug: author.data.slug }
-        : { name: 'Unknown Author', slug: post.author || '' },
-    };
-  })
+  page.data.map(async (post) => ({
+    post,
+    author: await resolveAuthorOrFallback(post.author),
+  }))
 );
 ---
 

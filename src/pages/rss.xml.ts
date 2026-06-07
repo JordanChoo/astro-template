@@ -8,10 +8,10 @@
  */
 
 import rss from '@astrojs/rss';
-import { getEntry } from 'astro:content';
 import type { APIContext } from 'astro';
 import siteConfig from '@/config/site';
 import { getBlogPosts } from '@/lib/content/provider';
+import { resolveAuthorOrFallback } from '@/lib/content/authors';
 
 const MAX_ITEMS = 25;
 
@@ -25,13 +25,10 @@ export async function GET(context: APIContext) {
   const recentPosts = sortedPosts.slice(0, MAX_ITEMS);
 
   const postsWithAuthors = await Promise.all(
-    recentPosts.map(async (post) => {
-      const author = post.author ? await getEntry('team', post.author) : undefined;
-      return {
-        post,
-        authorName: author?.data.name ?? 'Unknown Author',
-      };
-    })
+    recentPosts.map(async (post) => ({
+      post,
+      authorName: (await resolveAuthorOrFallback(post.author)).name,
+    }))
   );
 
   return rss({
