@@ -28,7 +28,7 @@ export interface BlogPost {
   tags: string[];
   categories: string[];
   category?: { name: string; slug: string } | undefined;
-  content: string;
+  content: string; // HTML (CMS) or Markdown (local)
   rendered?: { html: string; headings: BlogPostHeading[] } | undefined;
   seo?: BlogPostSeo | undefined;
   sitemapEligible: boolean;
