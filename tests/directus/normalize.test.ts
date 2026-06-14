@@ -7,7 +7,7 @@ vi.mock('../../src/lib/directus/assets', () => ({
 }));
 
 vi.mock('../../src/lib/directus/markdown', () => ({
-  renderMarkdown: vi.fn(),
+  renderHtml: vi.fn(),
 }));
 
 vi.mock('../../src/lib/directus/logger', () => ({
@@ -15,7 +15,7 @@ vi.mock('../../src/lib/directus/logger', () => ({
 }));
 
 import { resolveAssetUrl, assertNoTokenLeakage } from '../../src/lib/directus/assets';
-import { renderMarkdown } from '../../src/lib/directus/markdown';
+import { renderHtml } from '../../src/lib/directus/markdown';
 import { logger } from '../../src/lib/directus/logger';
 import {
   normalizeArticle,
@@ -24,7 +24,7 @@ import {
 } from '../../src/lib/directus/normalize';
 
 const mockResolveAssetUrl = resolveAssetUrl as ReturnType<typeof vi.fn>;
-const mockRenderMarkdown = renderMarkdown as ReturnType<typeof vi.fn>;
+const mockRenderHtml = renderHtml as ReturnType<typeof vi.fn>;
 const mockAssertNoTokenLeakage = assertNoTokenLeakage as ReturnType<typeof vi.fn>;
 const mockLoggerWarn = logger.warn as ReturnType<typeof vi.fn>;
 
@@ -32,7 +32,7 @@ describe('CMS data normalization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveAssetUrl.mockReturnValue(null);
-    mockRenderMarkdown.mockResolvedValue({ html: '<p>rendered</p>', headings: [] });
+    mockRenderHtml.mockResolvedValue({ html: '<p>rendered</p>', headings: [] });
   });
 
   describe('normalizeArticle', () => {
@@ -101,13 +101,13 @@ describe('CMS data normalization', () => {
 
     it('renders content via markdown pipeline', async () => {
       console.log('[TEST:normalize] markdown rendering');
-      mockRenderMarkdown.mockResolvedValue({
+      mockRenderHtml.mockResolvedValue({
         html: '<h2>Hello</h2>',
         headings: [{ depth: 2, slug: 'hello', text: 'Hello' }],
       });
       const raw = createArticle({ content: '## Hello' });
       const post = await normalizeArticle(raw);
-      expect(mockRenderMarkdown).toHaveBeenCalledWith('## Hello');
+      expect(mockRenderHtml).toHaveBeenCalledWith('## Hello');
       expect(post.rendered).toEqual({
         html: '<h2>Hello</h2>',
         headings: [{ depth: 2, slug: 'hello', text: 'Hello' }],
@@ -127,7 +127,7 @@ describe('CMS data normalization', () => {
       const post = await normalizeArticle(raw);
       expect(post.content).toBe('');
       expect(post.rendered).toBeUndefined();
-      expect(mockRenderMarkdown).not.toHaveBeenCalled();
+      expect(mockRenderHtml).not.toHaveBeenCalled();
     });
 
     it('maps featured_image_file via resolveAssetUrl', async () => {

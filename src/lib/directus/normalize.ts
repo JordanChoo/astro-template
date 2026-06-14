@@ -1,7 +1,7 @@
 import type { DirectusBlogArticle, DirectusBlogCategory } from './types.js';
 import type { BlogPost, BlogCategory, ImageMeta } from '../content/types.js';
 import { resolveAssetUrl, assertNoTokenLeakage } from './assets.js';
-import { renderMarkdown } from './markdown.js';
+import { renderHtml } from './markdown.js';
 import { logger } from './logger.js';
 
 function resolveImage(
@@ -45,7 +45,7 @@ export async function normalizeArticle(raw: DirectusBlogArticle): Promise<BlogPo
       : new Date();
 
   const content = raw.content ?? '';
-  const rendered = content ? await renderMarkdown(content) : undefined;
+  const rendered = content ? await renderHtml(content) : undefined;
 
   const image = resolveImage(raw, 'featured_image_file', 'featured_image', 'Featured image');
 

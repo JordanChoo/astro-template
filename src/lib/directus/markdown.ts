@@ -2,6 +2,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
+import rehypeParse from 'rehype-parse';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
@@ -64,6 +65,21 @@ const sanitizationSchema: Parameters<typeof rehypeSanitize>[0] & object = {
   },
 };
 
+const blogHtmlSanitizationSchema: Parameters<typeof rehypeSanitize>[0] & object = {
+  strip: ['script', 'style'],
+  tagNames: [
+    ...sanitizationSchema.tagNames!,
+    'iframe', 'mark', 'aside',
+  ],
+  attributes: {
+    ...sanitizationSchema.attributes,
+    '*': ['id', 'className', 'style'],
+    iframe: ['src', 'title', 'width', 'height', 'frameBorder', 'allowFullScreen', 'loading', 'allow'],
+    img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
+  },
+  protocols: sanitizationSchema.protocols,
+};
+
 function extractHeadings(tree: Root): Heading[] {
   const headings: Heading[] = [];
 
@@ -117,6 +133,26 @@ export async function renderMarkdown(
   const hast = await processor.run(mdast);
   const headings = extractHeadings(hast as Root);
   const html = processor.stringify(hast as Parameters<typeof processor.stringify>[0]);
+
+  return {
+    html: String(html),
+    headings,
+  };
+}
+
+const htmlProcessor = unified()
+  .use(rehypeParse, { fragment: true })
+  .use(rehypeSanitize, blogHtmlSanitizationSchema)
+  .use(rehypeSlug)
+  .use(rehypeStringify);
+
+export async function renderHtml(
+  content: string
+): Promise<{ html: string; headings: Heading[] }> {
+  const hast = htmlProcessor.parse(content);
+  const processed = await htmlProcessor.run(hast);
+  const headings = extractHeadings(processed as Root);
+  const html = htmlProcessor.stringify(processed as Parameters<typeof htmlProcessor.stringify>[0]);
 
   return {
     html: String(html),

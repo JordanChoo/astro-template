@@ -24,7 +24,7 @@ export interface DirectusBlogArticle {
   title: string;
   slug: string;
   short_description: string | null;
-  content: string | null;
+  content: string | null; // HTML
   author_slug: string | null;
   category: DirectusBlogCategory | null;
   featured_image_file: DirectusFile | null;
